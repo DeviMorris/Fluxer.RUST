@@ -346,6 +346,28 @@ impl MessagesApi {
             )
             .await
     }
+
+    pub async fn add_message_meme(
+        &self,
+        channel_id: Snowflake,
+        message_id: Snowflake,
+        body: &CreateFavoriteMemeBodyRequest,
+    ) -> Result<FavoriteMemeResponse> {
+        let ep = Endpoint::new(
+            HttpMethod::Post,
+            "/channels/{channel.id}/messages/{message.id}/memes",
+        )
+        .compile(
+            &QueryValues::new(),
+            &[
+                ("channel.id", &channel_id.to_string()),
+                ("message.id", &message_id.to_string()),
+            ],
+        )?;
+        self.http
+            .request_json::<CreateFavoriteMemeBodyRequest, FavoriteMemeResponse>(&ep, Some(body))
+            .await
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -520,6 +542,51 @@ pub struct ChannelPinsResponse {
 pub struct ChannelPinResponse {
     pub message: MessageResponse,
     pub pinned_at: String,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateFavoriteMemeBodyRequest {
+    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alt_text: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attachment_id: Option<Snowflake>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub embed_index: Option<i32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FavoriteMemeResponse {
+    pub id: Snowflake,
+    pub user_id: Snowflake,
+    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alt_text: Option<String>,
+    #[serde(default)]
+    pub tags: Vec<String>,
+    pub attachment_id: Snowflake,
+    pub filename: String,
+    pub content_type: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_hash: Option<String>,
+    pub size: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duration: Option<f64>,
+    pub url: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_gifv: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub klipy_slug: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tenor_slug_id: Option<String>,
     #[serde(flatten)]
     pub extra: Map<String, Value>,
 }

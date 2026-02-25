@@ -92,6 +92,24 @@ impl GuildsApi {
             .await
     }
 
+    pub async fn update_role_hoist_positions(
+        &self,
+        guild_id: Snowflake,
+        body: &GuildRoleHoistPositionsRequest,
+    ) -> Result<()> {
+        let ep = Endpoint::new(HttpMethod::Patch, "/guilds/{guild.id}/roles/hoist-positions")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_unit::<GuildRoleHoistPositionsRequest>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn clear_role_hoist_positions(&self, guild_id: Snowflake) -> Result<()> {
+        let ep = Endpoint::new(HttpMethod::Delete, "/guilds/{guild.id}/roles/hoist-positions")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http.request_unit::<()>(&ep, None).await
+    }
+
     pub async fn list_bans(&self, guild_id: Snowflake) -> Result<Vec<GuildBanResponse>> {
         let ep = Endpoint::new(HttpMethod::Get, "/guilds/{guild.id}/bans")
             .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
@@ -560,6 +578,14 @@ pub struct GuildRolePositionItem {
     pub id: Snowflake,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub position: Option<i64>,
+}
+
+pub type GuildRoleHoistPositionsRequest = Vec<GuildRoleHoistPositionItem>;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GuildRoleHoistPositionItem {
+    pub id: Snowflake,
+    pub hoist_position: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
