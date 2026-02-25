@@ -1,3 +1,4 @@
+mod auth;
 mod channels;
 mod client;
 mod endpoint;
@@ -93,6 +94,9 @@ pub use messages::SendMessageRequest;
 pub use channels::CallEligibilityResponse;
 pub use channels::CallRingRequest;
 pub use channels::CallUpdateRequest;
+pub use auth::AuthApi;
+pub use auth::AuthRequest;
+pub use auth::AuthSessionResponse;
 pub use rate_limiter::RateLimiter;
 pub use roles::CreateRoleRequest;
 pub use roles::ModifyMemberRolesRequest;
