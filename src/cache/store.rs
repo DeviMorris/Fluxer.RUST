@@ -159,10 +159,20 @@ impl Caches {
         }
     }
 
+    pub fn remove_guild(&self, guild_id: Snowflake) {
+        let _ = self.guilds.remove(&guild_id);
+        self.roles.clear_group(&guild_id);
+        self.members.clear_group(&guild_id);
+    }
+
     pub fn insert_channel(&self, channel: CachedChannel) {
         if self.policy.should_cache(CacheKind::Channel) {
             self.channels.insert(channel.id, channel);
         }
+    }
+
+    pub fn remove_channel(&self, channel_id: Snowflake) {
+        let _ = self.channels.remove(&channel_id);
     }
 
     pub fn insert_role(&self, role: CachedRole) {
@@ -171,10 +181,18 @@ impl Caches {
         }
     }
 
+    pub fn remove_role(&self, guild_id: Snowflake, role_id: Snowflake) {
+        let _ = self.roles.remove(&guild_id, &role_id);
+    }
+
     pub fn insert_member(&self, member: CachedMember) {
         if self.policy.should_cache(CacheKind::Member) {
             self.members.insert(member.guild_id, member.user_id, member);
         }
+    }
+
+    pub fn remove_member(&self, guild_id: Snowflake, user_id: Snowflake) {
+        let _ = self.members.remove(&guild_id, &user_id);
     }
 
     pub fn insert_user(&self, user: CachedUser) {

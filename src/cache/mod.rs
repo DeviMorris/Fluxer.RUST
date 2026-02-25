@@ -2,6 +2,7 @@ mod model;
 mod permission;
 mod policy;
 mod store;
+mod updater;
 
 pub use model::CachedChannel;
 pub use model::CachedGuild;
@@ -16,3 +17,4 @@ pub use policy::CachePolicy;
 pub use store::Caches;
 pub use store::GroupedCache;
 pub use store::SingleCache;
+pub use updater::CacheUpdater;
