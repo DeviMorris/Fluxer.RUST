@@ -6,6 +6,7 @@ mod members;
 mod messages;
 mod rate_limiter;
 mod roles;
+mod users;
 
 pub use channels::ChannelInviteCreateRequest;
 pub use channels::ChannelResponse;
@@ -68,3 +69,7 @@ pub use roles::ModifyMemberRolesRequest;
 pub use roles::RoleResponse;
 pub use roles::RolesApi;
 pub use roles::UpdateRoleRequest;
+pub use users::CreatePrivateChannelRequest;
+pub use users::UserPrivateResponse;
+pub use users::UserProfileUpdateRequest;
+pub use users::UsersApi;

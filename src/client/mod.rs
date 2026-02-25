@@ -4,6 +4,7 @@ use crate::events::{EventCollector, EventPipeline, EventPipelineConfig};
 use crate::gateway::{CompressionMode, GatewayClient, GatewayConfig};
 use crate::http::{
     ChannelsApi, GuildsApi, HttpClient, HttpClientConfig, MembersApi, MessagesApi, RolesApi,
+    UsersApi,
 };
 use crate::oauth2::OAuth2Client;
 use crate::voice::VoiceClient;
@@ -203,6 +204,10 @@ impl Client {
 
     pub fn roles(&self) -> RolesApi {
         RolesApi::new(self.inner.http.clone())
+    }
+
+    pub fn users(&self) -> UsersApi {
+        UsersApi::new(self.inner.http.clone())
     }
 
     pub async fn state(&self) -> ClientState {
