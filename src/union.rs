@@ -544,7 +544,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn channel_dispatch_known() {
+    fn channel_known() {
         let raw = r#"{"type":0,"id":"1","name":"general"}"#;
         let channel: Channel = serde_json::from_str(raw).expect("channel decode");
         match channel {
@@ -554,7 +554,7 @@ mod tests {
     }
 
     #[test]
-    fn channel_dispatch_unknown_preserves_raw() {
+    fn channel_unknown_raw() {
         let raw = r#"{"type":777,"id":"1","foo":"bar"}"#;
         let channel: Channel = serde_json::from_str(raw).expect("channel decode");
         match channel {
@@ -567,7 +567,7 @@ mod tests {
     }
 
     #[test]
-    fn permission_overwrite_dispatch_known() {
+    fn overwrite_known() {
         let raw = r#"{"type":0,"id":"1","allow":"1024","deny":"0"}"#;
         let overwrite: PermissionOverwrite = serde_json::from_str(raw).expect("decode");
         match overwrite {

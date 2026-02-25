@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use core::fmt;
 use core::str::FromStr;
 use serde::de::{Error as DeError, Unexpected, Visitor};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serializer};
 use std::time::Duration;
 
 use crate::enums::OAuth2Scope;
@@ -483,7 +483,7 @@ mod tests {
     }
 
     #[test]
-    fn snowflake_adapter_roundtrip() {
+    fn snowflake_roundtrip() {
         let src = IdHolder {
             id: Snowflake::new(123),
         };
@@ -494,7 +494,7 @@ mod tests {
     }
 
     #[test]
-    fn u64_string_adapter_roundtrip() {
+    fn u64_str_roundtrip() {
         let src = U64StringHolder { value: 42 };
         let json = serde_json::to_string(&src).expect("serialize");
         assert_eq!(json, r#"{"value":"42"}"#);
@@ -503,7 +503,7 @@ mod tests {
     }
 
     #[test]
-    fn nonce_accepts_number() {
+    fn nonce_number() {
         let parsed: NonceHolder = serde_json::from_str(r#"{"nonce":123}"#).expect("nonce");
         assert_eq!(parsed.nonce, "123");
     }

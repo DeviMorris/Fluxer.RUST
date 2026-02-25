@@ -382,7 +382,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn channel_type_unknown_roundtrip() {
+    fn channel_unknown_roundtrip() {
         let value = ChannelType::Unknown(777);
         let json = serde_json::to_string(&value).expect("serialize");
         let back: ChannelType = serde_json::from_str(&json).expect("deserialize");
@@ -390,7 +390,7 @@ mod tests {
     }
 
     #[test]
-    fn integration_type_unknown_roundtrip() {
+    fn integration_unknown_roundtrip() {
         let value: IntegrationType = serde_json::from_str("\"x-custom\"").expect("deserialize");
         assert!(matches!(value, IntegrationType::Unknown(_)));
         let out = serde_json::to_string(&value).expect("serialize");
@@ -398,7 +398,7 @@ mod tests {
     }
 
     #[test]
-    fn scope_known_and_unknown() {
+    fn scope_known_unknown() {
         let known: OAuth2Scope = "identify".into();
         let unknown: OAuth2Scope = "my.scope".into();
         assert_eq!(known.as_str(), "identify");

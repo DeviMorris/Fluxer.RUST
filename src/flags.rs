@@ -293,7 +293,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn permissions_serialize_as_string() {
+    fn perms_ser_string() {
         let p = Permissions::VIEW_CHANNEL | Permissions::SEND_MESSAGES;
         let json = serde_json::to_string(&p).expect("serialize permissions");
         let expected = (Permissions::VIEW_CHANNEL | Permissions::SEND_MESSAGES)
@@ -303,14 +303,14 @@ mod tests {
     }
 
     #[test]
-    fn permissions_parse_from_string() {
+    fn perms_parse() {
         let parsed: Permissions =
             serde_json::from_str("\"1024\"").expect("deserialize permissions");
         assert!(parsed.has_all(Permissions::VIEW_CHANNEL));
     }
 
     #[test]
-    fn message_flags_roundtrip() {
+    fn msg_flags_roundtrip() {
         let flags = MessageFlags::SUPPRESS_EMBEDS | MessageFlags::IS_VOICE_MESSAGE;
         let json = serde_json::to_string(&flags).expect("serialize message flags");
         let back: MessageFlags = serde_json::from_str(&json).expect("deserialize message flags");

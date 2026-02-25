@@ -69,6 +69,10 @@ pub enum ProtocolError {
     Json(#[source] serde_json::Error),
     #[error("invalid payload: {0}")]
     InvalidPayload(String),
+    #[error("invalid route template: {0}")]
+    InvalidRouteTemplate(String),
+    #[error("missing route parameter: {0}")]
+    MissingRouteParam(String),
     #[error("unexpected opcode: expected {expected}, got {got}")]
     UnexpectedOpcode { expected: u8, got: u8 },
     #[error("unsupported protocol version: {0}")]
@@ -162,13 +166,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn categorizes_error() {
+    fn category() {
         let err = Error::from(TransportError::Timeout);
         assert_eq!(err.category(), ErrorCategory::Transport);
     }
 
     #[test]
-    fn api_error_message_contains_code_when_present() {
+    fn api_msg_with_code() {
         let err = ApiError::new(400, Some(1001), "bad request");
         assert_eq!(
             err.to_string(),
@@ -177,7 +181,7 @@ mod tests {
     }
 
     #[test]
-    fn api_error_message_omits_code_when_missing() {
+    fn api_msg_no_code() {
         let err = ApiError::new(401, None, "unauthorized");
         assert_eq!(err.to_string(), "api error (status 401): unauthorized");
     }

@@ -157,13 +157,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parses_and_formats() {
+    fn parse_format() {
         let id: Snowflake = "175928847299117063".parse().expect("valid snowflake");
         assert_eq!(id.to_string(), "175928847299117063");
     }
 
     #[test]
-    fn extracts_parts() {
+    fn parts() {
         let id = Snowflake::new(175928847299117063);
         assert_eq!(id.worker_id(), 1);
         assert_eq!(id.process_id(), 0);
@@ -171,14 +171,14 @@ mod tests {
     }
 
     #[test]
-    fn serializes_as_string() {
+    fn ser_string() {
         let id = Snowflake::new(42);
         let json = serde_json::to_string(&id).expect("serialize snowflake");
         assert_eq!(json, "\"42\"");
     }
 
     #[test]
-    fn deserializes_from_number_or_string() {
+    fn de_num_or_str() {
         let from_str: Snowflake = serde_json::from_str("\"42\"").expect("from string");
         let from_num: Snowflake = serde_json::from_str("42").expect("from number");
         assert_eq!(from_str, Snowflake::new(42));

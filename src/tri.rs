@@ -182,7 +182,7 @@ mod tests {
     }
 
     #[test]
-    fn patch_omitted_skips_field() {
+    fn omitted_skips() {
         let value = PatchHolder {
             name: Patch::Omitted,
         };
@@ -191,20 +191,20 @@ mod tests {
     }
 
     #[test]
-    fn patch_null_serializes_as_null() {
+    fn null_serializes() {
         let value = PatchHolder { name: Patch::Null };
         let json = serde_json::to_string(&value).expect("serialize");
         assert_eq!(json, r#"{"name":null}"#);
     }
 
     #[test]
-    fn patch_deserialize_missing_as_omitted() {
+    fn de_missing_omitted() {
         let value: PatchHolder = serde_json::from_str("{}").expect("deserialize");
         assert!(value.name.is_omitted());
     }
 
     #[test]
-    fn patch_deserialize_null() {
+    fn de_null() {
         let value: PatchHolder = serde_json::from_str(r#"{"name":null}"#).expect("deserialize");
         assert!(value.name.is_null());
     }
