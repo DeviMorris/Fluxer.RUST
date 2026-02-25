@@ -2,7 +2,9 @@ use crate::cache::{CachePolicy, Caches};
 use crate::error::{Result, StateError};
 use crate::events::{EventCollector, EventPipeline, EventPipelineConfig};
 use crate::gateway::{CompressionMode, GatewayClient, GatewayConfig};
-use crate::http::{HttpClient, HttpClientConfig};
+use crate::http::{
+    ChannelsApi, GuildsApi, HttpClient, HttpClientConfig, MembersApi, MessagesApi, RolesApi,
+};
 use crate::oauth2::OAuth2Client;
 use crate::voice::VoiceClient;
 use crate::webhook::WebhookClient;
@@ -176,6 +178,26 @@ impl Client {
 
     pub fn voice(&self) -> VoiceClient {
         VoiceClient::new(self.inner.http.clone(), self.inner.gateway.clone())
+    }
+
+    pub fn messages(&self) -> MessagesApi {
+        MessagesApi::new(self.inner.http.clone())
+    }
+
+    pub fn channels(&self) -> ChannelsApi {
+        ChannelsApi::new(self.inner.http.clone())
+    }
+
+    pub fn guilds(&self) -> GuildsApi {
+        GuildsApi::new(self.inner.http.clone())
+    }
+
+    pub fn members(&self) -> MembersApi {
+        MembersApi::new(self.inner.http.clone())
+    }
+
+    pub fn roles(&self) -> RolesApi {
+        RolesApi::new(self.inner.http.clone())
     }
 
     pub async fn state(&self) -> ClientState {
