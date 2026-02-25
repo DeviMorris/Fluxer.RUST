@@ -214,6 +214,10 @@ impl Client {
         UsersApi::new(self.inner.http.clone())
     }
 
+    pub fn users_api(&self) -> UsersApi {
+        self.users()
+    }
+
     pub fn invites(&self) -> InvitesApi {
         InvitesApi::new(self.inner.http.clone())
     }
