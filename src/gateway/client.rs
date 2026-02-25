@@ -1,4 +1,5 @@
 use crate::error::{Result, StateError, TransportError};
+use crate::gateway::dispatch::{DispatchEnvelope, decode_dispatch};
 use crate::gateway::rate_limiter::{OutboundKind, OutboundRateLimiter};
 use crate::gateway::transport::GatewayTransport;
 use futures_util::future::pending;
@@ -100,6 +101,7 @@ struct Inner {
     resume: RwLock<Option<ResumeState>>,
     outbound_tx: Mutex<Option<mpsc::Sender<OutboundCommand>>>,
     events_tx: broadcast::Sender<GatewayEvent>,
+    dispatch_tx: broadcast::Sender<DispatchEnvelope>,
     shutdown: Notify,
     closed: AtomicBool,
     runner: Mutex<Option<JoinHandle<()>>>,
@@ -120,6 +122,7 @@ enum LoopAction {
 impl GatewayClient {
     pub fn new(cfg: GatewayConfig) -> Self {
         let (events_tx, _) = broadcast::channel(256);
+        let (dispatch_tx, _) = broadcast::channel(256);
         Self {
             inner: Arc::new(Inner {
                 cfg,
@@ -127,6 +130,7 @@ impl GatewayClient {
                 resume: RwLock::new(None),
                 outbound_tx: Mutex::new(None),
                 events_tx,
+                dispatch_tx,
                 shutdown: Notify::new(),
                 closed: AtomicBool::new(true),
                 runner: Mutex::new(None),
@@ -182,6 +186,10 @@ impl GatewayClient {
 
     pub fn subscribe(&self) -> broadcast::Receiver<GatewayEvent> {
         self.inner.events_tx.subscribe()
+    }
+
+    pub fn subscribe_dispatch(&self) -> broadcast::Receiver<DispatchEnvelope> {
+        self.inner.dispatch_tx.subscribe()
     }
 
     pub async fn status(&self) -> GatewayStatus {
@@ -368,6 +376,9 @@ async fn run_connection(
                     _ => {}
                 }
 
+                if let Some(dispatch) = decode_dispatch(&event)? {
+                    let _ = inner.dispatch_tx.send(dispatch);
+                }
                 let _ = inner.events_tx.send(event);
             }
         }
