@@ -1,5 +1,6 @@
 pub mod enums;
 pub mod error;
+pub mod events;
 pub mod flags;
 pub mod gateway;
 pub mod http;
