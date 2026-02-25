@@ -3,6 +3,9 @@ use crate::error::{Result, StateError};
 use crate::events::{EventCollector, EventPipeline, EventPipelineConfig};
 use crate::gateway::{CompressionMode, GatewayClient, GatewayConfig};
 use crate::http::{HttpClient, HttpClientConfig};
+use crate::oauth2::OAuth2Client;
+use crate::voice::VoiceClient;
+use crate::webhook::WebhookClient;
 use std::sync::Arc;
 use tokio::sync::{Mutex, RwLock};
 use tokio::task::JoinHandle;
@@ -157,6 +160,18 @@ impl Client {
 
     pub fn collector(&self) -> EventCollector {
         self.inner.events.collector()
+    }
+
+    pub fn oauth2(&self) -> OAuth2Client {
+        OAuth2Client::new(self.inner.http.clone())
+    }
+
+    pub fn webhooks(&self) -> WebhookClient {
+        WebhookClient::new(self.inner.http.clone())
+    }
+
+    pub fn voice(&self) -> VoiceClient {
+        VoiceClient::new(self.inner.http.clone(), self.inner.gateway.clone())
     }
 
     pub async fn state(&self) -> ClientState {

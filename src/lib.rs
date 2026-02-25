@@ -7,9 +7,12 @@ pub mod flags;
 pub mod gateway;
 pub mod http;
 pub mod id;
+pub mod oauth2;
 pub mod ser;
 pub mod tri;
 pub mod union;
+pub mod voice;
+pub mod webhook;
 
 pub use client::Client;
 pub use client::ClientBuilder;

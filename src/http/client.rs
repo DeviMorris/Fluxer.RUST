@@ -134,10 +134,56 @@ impl HttpClient {
         Ok(())
     }
 
+    pub async fn request_json_with_auth<B, T>(
+        &self,
+        endpoint: &CompiledEndpoint,
+        body: Option<&B>,
+        auth_header: Option<&str>,
+    ) -> Result<T>
+    where
+        B: Serialize + ?Sized,
+        T: DeserializeOwned,
+    {
+        let response = self.request_with_auth(endpoint, body, auth_header).await?;
+        if response.status().as_u16() == 204 {
+            return serde_json::from_value(serde_json::Value::Null)
+                .map_err(|e| Error::Protocol(crate::error::ProtocolError::Json(e)));
+        }
+
+        let bytes = response.bytes().await.map_err(map_reqwest_error)?;
+        serde_json::from_slice(&bytes)
+            .map_err(|e| Error::Protocol(crate::error::ProtocolError::Json(e)))
+    }
+
+    pub async fn request_unit_with_auth<B>(
+        &self,
+        endpoint: &CompiledEndpoint,
+        body: Option<&B>,
+        auth_header: Option<&str>,
+    ) -> Result<()>
+    where
+        B: Serialize + ?Sized,
+    {
+        let _ = self.request_with_auth(endpoint, body, auth_header).await?;
+        Ok(())
+    }
+
     async fn request<B>(
         &self,
         endpoint: &CompiledEndpoint,
         body: Option<&B>,
+    ) -> Result<reqwest::Response>
+    where
+        B: Serialize + ?Sized,
+    {
+        self.request_with_auth(endpoint, body, None).await
+    }
+
+    async fn request_with_auth<B>(
+        &self,
+        endpoint: &CompiledEndpoint,
+        body: Option<&B>,
+        auth_header: Option<&str>,
     ) -> Result<reqwest::Response>
     where
         B: Serialize + ?Sized,
@@ -155,7 +201,7 @@ impl HttpClient {
                 .acquire(endpoint, &self.shutdown.notify)
                 .await?;
 
-            let request = self.build_request(endpoint, body)?;
+            let request = self.build_request(endpoint, body, auth_header)?;
             let response = request.send().await;
 
             match response {
@@ -208,6 +254,7 @@ impl HttpClient {
         &self,
         endpoint: &CompiledEndpoint,
         body: Option<&B>,
+        auth_header: Option<&str>,
     ) -> Result<reqwest::RequestBuilder>
     where
         B: Serialize + ?Sized,
@@ -218,7 +265,9 @@ impl HttpClient {
 
         let mut builder = self.inner.request(method, url);
 
-        if endpoint.auth == AuthPolicy::Bot {
+        if let Some(auth_header) = auth_header {
+            builder = builder.header(AUTHORIZATION, auth_header);
+        } else if endpoint.auth == AuthPolicy::Bot {
             let token = self
                 .cfg
                 .bot_token
