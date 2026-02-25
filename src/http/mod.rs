@@ -45,6 +45,8 @@ pub use guilds::GuildStickerUpdateRequest;
 pub use guilds::GuildUpdateRequest;
 pub use guilds::GuildsApi;
 pub use members::BanMemberRequest;
+pub use members::GuildMemberSearchRequest;
+pub use members::GuildMemberUpdateRequest;
 pub use members::ListMembersQuery;
 pub use members::MemberResponse;
 pub use members::MembersApi;

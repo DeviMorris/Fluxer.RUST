@@ -86,6 +86,78 @@ impl MembersApi {
         )?;
         self.http.request_unit::<()>(&ep, None).await
     }
+
+    pub async fn update_member(
+        &self,
+        guild_id: Snowflake,
+        user_id: Snowflake,
+        body: &GuildMemberUpdateRequest,
+    ) -> Result<MemberResponse> {
+        let ep = Endpoint::new(HttpMethod::Patch, "/guilds/{guild.id}/members/{user.id}").compile(
+            &QueryValues::new(),
+            &[
+                ("guild.id", &guild_id.to_string()),
+                ("user.id", &user_id.to_string()),
+            ],
+        )?;
+        self.http
+            .request_json::<GuildMemberUpdateRequest, MemberResponse>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn search_members(
+        &self,
+        guild_id: Snowflake,
+        body: &GuildMemberSearchRequest,
+    ) -> Result<Vec<MemberResponse>> {
+        let ep = Endpoint::new(HttpMethod::Post, "/guilds/{guild.id}/members-search")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<GuildMemberSearchRequest, Vec<MemberResponse>>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn add_member_role(
+        &self,
+        guild_id: Snowflake,
+        user_id: Snowflake,
+        role_id: Snowflake,
+    ) -> Result<()> {
+        let ep = Endpoint::new(
+            HttpMethod::Put,
+            "/guilds/{guild.id}/members/{user.id}/roles/{role.id}",
+        )
+        .compile(
+            &QueryValues::new(),
+            &[
+                ("guild.id", &guild_id.to_string()),
+                ("user.id", &user_id.to_string()),
+                ("role.id", &role_id.to_string()),
+            ],
+        )?;
+        self.http.request_unit::<()>(&ep, None).await
+    }
+
+    pub async fn remove_member_role(
+        &self,
+        guild_id: Snowflake,
+        user_id: Snowflake,
+        role_id: Snowflake,
+    ) -> Result<()> {
+        let ep = Endpoint::new(
+            HttpMethod::Delete,
+            "/guilds/{guild.id}/members/{user.id}/roles/{role.id}",
+        )
+        .compile(
+            &QueryValues::new(),
+            &[
+                ("guild.id", &guild_id.to_string()),
+                ("user.id", &user_id.to_string()),
+                ("role.id", &role_id.to_string()),
+            ],
+        )?;
+        self.http.request_unit::<()>(&ep, None).await
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -100,6 +172,68 @@ pub struct ListMembersQuery {
 pub struct BanMemberRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub delete_message_seconds: Option<u32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GuildMemberUpdateRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accent_color: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub banner: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bio: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub channel_id: Option<Snowflake>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub communication_disabled_until: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub connection_id: Option<Snowflake>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deaf: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mute: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub nick: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub profile_flags: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pronouns: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub roles: Option<Vec<Snowflake>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub timeout_reason: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GuildMemberSearchRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_bot: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub join_source_type: Option<Vec<i64>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub joined_at_gte: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub joined_at_lte: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub limit: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offset: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub query: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role_ids: Option<Vec<Snowflake>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sort_by: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sort_order: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_invite_code: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_created_at_gte: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_created_at_lte: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -120,6 +254,8 @@ pub struct MemberResponse {
     pub mute: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pending: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub communication_disabled_until: Option<String>,
     #[serde(flatten)]
     pub extra: Map<String, Value>,
 }
