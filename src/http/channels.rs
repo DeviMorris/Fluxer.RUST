@@ -146,6 +146,65 @@ impl ChannelsApi {
         )?;
         self.http.request_unit::<()>(&ep, None).await
     }
+
+    pub async fn list_rtc_regions(&self, channel_id: Snowflake) -> Result<Vec<RtcRegionResponse>> {
+        let ep = Endpoint::new(HttpMethod::Get, "/channels/{channel.id}/rtc-regions").compile(
+            &QueryValues::new(),
+            &[("channel.id", &channel_id.to_string())],
+        )?;
+        self.http
+            .request_json::<(), Vec<RtcRegionResponse>>(&ep, None)
+            .await
+    }
+
+    pub async fn indicate_typing(&self, channel_id: Snowflake) -> Result<()> {
+        let ep = Endpoint::new(HttpMethod::Post, "/channels/{channel.id}/typing").compile(
+            &QueryValues::new(),
+            &[("channel.id", &channel_id.to_string())],
+        )?;
+        self.http.request_unit::<()>(&ep, None).await
+    }
+
+    pub async fn add_group_dm_recipient(
+        &self,
+        channel_id: Snowflake,
+        user_id: Snowflake,
+    ) -> Result<()> {
+        let ep = Endpoint::new(
+            HttpMethod::Put,
+            "/channels/{channel.id}/recipients/{user.id}",
+        )
+        .compile(
+            &QueryValues::new(),
+            &[
+                ("channel.id", &channel_id.to_string()),
+                ("user.id", &user_id.to_string()),
+            ],
+        )?;
+        self.http.request_unit::<()>(&ep, None).await
+    }
+
+    pub async fn remove_group_dm_recipient(
+        &self,
+        channel_id: Snowflake,
+        user_id: Snowflake,
+        silent: Option<bool>,
+    ) -> Result<()> {
+        let mut q = QueryValues::new();
+        q.insert_opt("silent", silent);
+        let ep = Endpoint::new(
+            HttpMethod::Delete,
+            "/channels/{channel.id}/recipients/{user.id}",
+        )
+        .compile(
+            &q,
+            &[
+                ("channel.id", &channel_id.to_string()),
+                ("user.id", &user_id.to_string()),
+            ],
+        )?;
+        self.http.request_unit::<()>(&ep, None).await
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -265,4 +324,11 @@ pub struct PermissionOverwriteCreateRequest {
     pub allow: Option<Permissions>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub deny: Option<Permissions>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RtcRegionResponse {
+    pub id: String,
+    pub name: String,
+    pub emoji: String,
 }

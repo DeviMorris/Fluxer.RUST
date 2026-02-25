@@ -158,6 +158,26 @@ impl MembersApi {
         )?;
         self.http.request_unit::<()>(&ep, None).await
     }
+
+    pub async fn get_my_member(&self, guild_id: Snowflake) -> Result<MemberResponse> {
+        let ep = Endpoint::new(HttpMethod::Get, "/guilds/{guild.id}/members/@me")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<(), MemberResponse>(&ep, None)
+            .await
+    }
+
+    pub async fn update_my_member(
+        &self,
+        guild_id: Snowflake,
+        body: &MyGuildMemberUpdateRequest,
+    ) -> Result<MemberResponse> {
+        let ep = Endpoint::new(HttpMethod::Patch, "/guilds/{guild.id}/members/@me")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<MyGuildMemberUpdateRequest, MemberResponse>(&ep, Some(body))
+            .await
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -234,6 +254,36 @@ pub struct GuildMemberSearchRequest {
     pub user_created_at_gte: Option<i64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_created_at_lte: Option<i64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MyGuildMemberUpdateRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub nick: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub banner: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bio: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pronouns: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accent_color: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub profile_flags: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mute: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deaf: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub communication_disabled_until: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub timeout_reason: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub channel_id: Option<Snowflake>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub connection_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

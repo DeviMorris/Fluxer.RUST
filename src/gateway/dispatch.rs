@@ -339,16 +339,118 @@ pub struct WebhooksPayload {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct InteractionPayload {
+pub struct SlashCommandInteraction {
     pub id: Snowflake,
+    #[serde(default)]
+    pub application_id: Option<Snowflake>,
     #[serde(rename = "type")]
     pub interaction_type: i32,
     #[serde(default)]
     pub guild_id: Option<Snowflake>,
     #[serde(default)]
     pub channel_id: Option<Snowflake>,
+    #[serde(default)]
+    pub token: Option<String>,
+    #[serde(default)]
+    pub data: Option<Value>,
+    #[serde(default)]
+    pub member: Option<Value>,
+    #[serde(default)]
+    pub user: Option<Value>,
+    #[serde(default)]
+    pub message: Option<Value>,
     #[serde(flatten)]
     pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ComponentInteraction {
+    pub id: Snowflake,
+    #[serde(default)]
+    pub application_id: Option<Snowflake>,
+    #[serde(rename = "type")]
+    pub interaction_type: i32,
+    #[serde(default)]
+    pub guild_id: Option<Snowflake>,
+    #[serde(default)]
+    pub channel_id: Option<Snowflake>,
+    #[serde(default)]
+    pub token: Option<String>,
+    #[serde(default)]
+    pub data: Option<Value>,
+    #[serde(default)]
+    pub member: Option<Value>,
+    #[serde(default)]
+    pub user: Option<Value>,
+    #[serde(default)]
+    pub message: Option<Value>,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ModalInteraction {
+    pub id: Snowflake,
+    #[serde(default)]
+    pub application_id: Option<Snowflake>,
+    #[serde(rename = "type")]
+    pub interaction_type: i32,
+    #[serde(default)]
+    pub guild_id: Option<Snowflake>,
+    #[serde(default)]
+    pub channel_id: Option<Snowflake>,
+    #[serde(default)]
+    pub token: Option<String>,
+    #[serde(default)]
+    pub data: Option<Value>,
+    #[serde(default)]
+    pub member: Option<Value>,
+    #[serde(default)]
+    pub user: Option<Value>,
+    #[serde(default)]
+    pub message: Option<Value>,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct AutocompleteInteraction {
+    pub id: Snowflake,
+    #[serde(default)]
+    pub application_id: Option<Snowflake>,
+    #[serde(rename = "type")]
+    pub interaction_type: i32,
+    #[serde(default)]
+    pub guild_id: Option<Snowflake>,
+    #[serde(default)]
+    pub channel_id: Option<Snowflake>,
+    #[serde(default)]
+    pub token: Option<String>,
+    #[serde(default)]
+    pub data: Option<Value>,
+    #[serde(default)]
+    pub member: Option<Value>,
+    #[serde(default)]
+    pub user: Option<Value>,
+    #[serde(default)]
+    pub message: Option<Value>,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone)]
+pub struct UnknownInteraction {
+    pub interaction_type: i32,
+    pub raw: Value,
+}
+
+#[derive(Debug, Clone)]
+pub enum InteractionPayload {
+    SlashCommand(SlashCommandInteraction),
+    Component(ComponentInteraction),
+    Modal(ModalInteraction),
+    Autocomplete(AutocompleteInteraction),
+    Unknown(UnknownInteraction),
 }
 
 #[derive(Debug, Clone)]
@@ -418,7 +520,7 @@ pub fn decode_dispatch(event: &GatewayEvent) -> Result<Option<DispatchEnvelope>>
         "VOICE_STATE_UPDATE" => DispatchEvent::VoiceStateUpdate(parse(payload, &kind)?),
         "VOICE_SERVER_UPDATE" => DispatchEvent::VoiceServerUpdate(parse(payload, &kind)?),
         "WEBHOOKS_UPDATE" => DispatchEvent::WebhooksUpdate(parse(payload, &kind)?),
-        "INTERACTION_CREATE" => DispatchEvent::InteractionCreate(parse(payload, &kind)?),
+        "INTERACTION_CREATE" => DispatchEvent::InteractionCreate(parse_interaction(payload)?),
         _ => DispatchEvent::Unknown(UnknownDispatchEvent {
             event_type: kind,
             raw: payload,
@@ -435,6 +537,37 @@ fn parse<T: for<'de> Deserialize<'de>>(payload: Value, event_type: &str) -> Resu
     serde_json::from_value(payload).map_err(|e| {
         ProtocolError::InvalidPayload(format!("failed to decode {event_type}: {e}")).into()
     })
+}
+
+fn parse_interaction(payload: Value) -> Result<InteractionPayload> {
+    let interaction_type = payload
+        .get("type")
+        .and_then(Value::as_i64)
+        .unwrap_or_default() as i32;
+
+    // skit bumbumbumbumbum
+    match interaction_type {
+        2 => Ok(InteractionPayload::SlashCommand(parse(
+            payload,
+            "INTERACTION_CREATE",
+        )?)),
+        3 => Ok(InteractionPayload::Component(parse(
+            payload,
+            "INTERACTION_CREATE",
+        )?)),
+        4 => Ok(InteractionPayload::Autocomplete(parse(
+            payload,
+            "INTERACTION_CREATE",
+        )?)),
+        5 => Ok(InteractionPayload::Modal(parse(
+            payload,
+            "INTERACTION_CREATE",
+        )?)),
+        _ => Ok(InteractionPayload::Unknown(UnknownInteraction {
+            interaction_type,
+            raw: payload,
+        })),
+    }
 }
 
 #[cfg(test)]

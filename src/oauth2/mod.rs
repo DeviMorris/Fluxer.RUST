@@ -168,37 +168,48 @@ impl OAuth2Client {
     }
 
     pub async fn delete_application(&self, id: Snowflake) -> Result<()> {
+        self.delete_application_with_sudo(id, &SudoVerificationSchema::default())
+            .await
+    }
+
+    pub async fn delete_application_with_sudo(
+        &self,
+        id: Snowflake,
+        body: &SudoVerificationSchema,
+    ) -> Result<()> {
         let ep = Endpoint::new(HttpMethod::Delete, "/oauth2/applications/{id}")
             .compile(&QueryValues::new(), &[("id", &id.to_string())])?;
-        self.http.request_unit::<()>(&ep, None).await
+        self.http.request_unit(&ep, Some(body)).await
     }
 
     pub async fn update_bot(
         &self,
         id: Snowflake,
         body: &OAuthBotProfileUpdateRequest,
-    ) -> Result<OAuthApplicationResponse> {
+    ) -> Result<BotProfileResponse> {
         let ep = Endpoint::new(HttpMethod::Patch, "/oauth2/applications/{id}/bot")
             .compile(&QueryValues::new(), &[("id", &id.to_string())])?;
         self.http
-            .request_json::<OAuthBotProfileUpdateRequest, OAuthApplicationResponse>(
-                &ep,
-                Some(body),
-            )
+            .request_json::<OAuthBotProfileUpdateRequest, BotProfileResponse>(&ep, Some(body))
             .await
     }
 
-    pub async fn reset_bot_token(&self, id: Snowflake) -> Result<OAuthBotTokenResetResponse> {
+    pub async fn reset_bot_token(
+        &self,
+        id: Snowflake,
+        body: &SudoVerificationSchema,
+    ) -> Result<OAuthBotTokenResetResponse> {
         let ep = Endpoint::new(HttpMethod::Post, "/oauth2/applications/{id}/bot/reset-token")
             .compile(&QueryValues::new(), &[("id", &id.to_string())])?;
         self.http
-            .request_json::<(), OAuthBotTokenResetResponse>(&ep, None)
+            .request_json::<SudoVerificationSchema, OAuthBotTokenResetResponse>(&ep, Some(body))
             .await
     }
 
     pub async fn reset_client_secret(
         &self,
         id: Snowflake,
+        body: &SudoVerificationSchema,
     ) -> Result<OAuthClientSecretResetResponse> {
         let ep = Endpoint::new(
             HttpMethod::Post,
@@ -206,7 +217,10 @@ impl OAuth2Client {
         )
         .compile(&QueryValues::new(), &[("id", &id.to_string())])?;
         self.http
-            .request_json::<(), OAuthClientSecretResetResponse>(&ep, None)
+            .request_json::<SudoVerificationSchema, OAuthClientSecretResetResponse>(
+                &ep,
+                Some(body),
+            )
             .await
     }
 }
@@ -468,6 +482,22 @@ pub struct OAuthBotProfileUpdateRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub bot_flags: Option<i32>,
 }
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SudoVerificationSchema {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub password: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mfa_method: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mfa_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub webauthn_response: Option<Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub webauthn_challenge: Option<String>,
+}
+
+pub type BotProfileResponse = ApplicationBotResponse;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OAuthBotTokenResetResponse {
