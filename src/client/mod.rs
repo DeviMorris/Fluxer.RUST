@@ -3,8 +3,8 @@ use crate::error::{Result, StateError};
 use crate::events::{EventCollector, EventPipeline, EventPipelineConfig};
 use crate::gateway::{CompressionMode, GatewayClient, GatewayConfig};
 use crate::http::{
-    ChannelsApi, GuildsApi, HttpClient, HttpClientConfig, InteractionsApi, MembersApi,
-    MessagesApi, RolesApi, UsersApi,
+    ChannelsApi, GatewayApi, GuildsApi, HttpClient, HttpClientConfig, InteractionsApi, InvitesApi,
+    MembersApi, MessagesApi, RolesApi, UsersApi, WebhooksApi,
 };
 use crate::oauth2::OAuth2Client;
 use crate::voice::VoiceClient;
@@ -182,6 +182,10 @@ impl Client {
         WebhookClient::new(self.inner.http.clone())
     }
 
+    pub fn webhooks_api(&self) -> WebhooksApi {
+        WebhooksApi::new(self.inner.http.clone())
+    }
+
     pub fn voice(&self) -> VoiceClient {
         VoiceClient::new(self.inner.http.clone(), self.inner.gateway.clone())
     }
@@ -208,6 +212,14 @@ impl Client {
 
     pub fn users(&self) -> UsersApi {
         UsersApi::new(self.inner.http.clone())
+    }
+
+    pub fn invites(&self) -> InvitesApi {
+        InvitesApi::new(self.inner.http.clone())
+    }
+
+    pub fn gateway_api(&self) -> GatewayApi {
+        GatewayApi::new(self.inner.http.clone())
     }
 
     pub fn interactions(&self) -> InteractionsApi {

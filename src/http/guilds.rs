@@ -1,5 +1,6 @@
 use super::channels::{ChannelResponse, InviteResponse};
 use super::roles::RoleResponse;
+use super::webhooks::WebhookResponse;
 use crate::error::Result;
 use crate::flags::SystemChannelFlags;
 use crate::http::{Endpoint, HttpClient, HttpMethod, QueryValues};
@@ -33,6 +34,21 @@ impl GuildsApi {
             .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
         self.http
             .request_json::<GuildUpdateRequest, GuildResponse>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn create_guild(&self, body: &GuildCreateRequest) -> Result<GuildResponse> {
+        let ep = Endpoint::new(HttpMethod::Post, "/guilds").compile(&QueryValues::new(), &[])?;
+        self.http
+            .request_json::<GuildCreateRequest, GuildResponse>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn delete_guild(&self, guild_id: Snowflake, body: &GuildDeleteRequest) -> Result<()> {
+        let ep = Endpoint::new(HttpMethod::Post, "/guilds/{guild.id}/delete")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_unit::<GuildDeleteRequest>(&ep, Some(body))
             .await
     }
 
@@ -109,6 +125,126 @@ impl GuildsApi {
         self.http
             .request_json::<(), Vec<InviteResponse>>(&ep, None)
             .await
+    }
+
+    pub async fn get_guild_vanity_url(
+        &self,
+        guild_id: Snowflake,
+    ) -> Result<GuildVanityUrlResponse> {
+        let ep = Endpoint::new(HttpMethod::Get, "/guilds/{guild.id}/vanity-url")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<(), GuildVanityUrlResponse>(&ep, None)
+            .await
+    }
+
+    pub async fn update_guild_vanity_url(
+        &self,
+        guild_id: Snowflake,
+        body: &GuildVanityUrlUpdateRequest,
+    ) -> Result<GuildVanityUrlUpdateResponse> {
+        let ep = Endpoint::new(HttpMethod::Patch, "/guilds/{guild.id}/vanity-url")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<GuildVanityUrlUpdateRequest, GuildVanityUrlUpdateResponse>(
+                &ep,
+                Some(body),
+            )
+            .await
+    }
+
+    pub async fn list_guild_webhooks(&self, guild_id: Snowflake) -> Result<Vec<WebhookResponse>> {
+        let ep = Endpoint::new(HttpMethod::Get, "/guilds/{guild.id}/webhooks")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<(), Vec<WebhookResponse>>(&ep, None)
+            .await
+    }
+
+    pub async fn transfer_guild_ownership(
+        &self,
+        guild_id: Snowflake,
+        body: &GuildTransferOwnershipRequest,
+    ) -> Result<GuildResponse> {
+        let ep = Endpoint::new(HttpMethod::Post, "/guilds/{guild.id}/transfer-ownership")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<GuildTransferOwnershipRequest, GuildResponse>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn toggle_detached_banner(
+        &self,
+        guild_id: Snowflake,
+        body: &EnabledToggleRequest,
+    ) -> Result<GuildResponse> {
+        let ep = Endpoint::new(HttpMethod::Patch, "/guilds/{guild.id}/detached-banner")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<EnabledToggleRequest, GuildResponse>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn toggle_text_channel_flexible_names(
+        &self,
+        guild_id: Snowflake,
+        body: &EnabledToggleRequest,
+    ) -> Result<GuildResponse> {
+        let ep = Endpoint::new(
+            HttpMethod::Patch,
+            "/guilds/{guild.id}/text-channel-flexible-names",
+        )
+        .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<EnabledToggleRequest, GuildResponse>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn get_guild_discovery_status(
+        &self,
+        guild_id: Snowflake,
+    ) -> Result<DiscoveryStatusResponse> {
+        let ep = Endpoint::new(HttpMethod::Get, "/guilds/{guild.id}/discovery")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<(), DiscoveryStatusResponse>(&ep, None)
+            .await
+    }
+
+    pub async fn apply_for_guild_discovery(
+        &self,
+        guild_id: Snowflake,
+        body: &DiscoveryApplicationRequest,
+    ) -> Result<DiscoveryApplicationResponse> {
+        let ep = Endpoint::new(HttpMethod::Post, "/guilds/{guild.id}/discovery")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<DiscoveryApplicationRequest, DiscoveryApplicationResponse>(
+                &ep,
+                Some(body),
+            )
+            .await
+    }
+
+    pub async fn update_guild_discovery_application(
+        &self,
+        guild_id: Snowflake,
+        body: &DiscoveryApplicationPatchRequest,
+    ) -> Result<DiscoveryApplicationResponse> {
+        let ep = Endpoint::new(HttpMethod::Patch, "/guilds/{guild.id}/discovery")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_json::<DiscoveryApplicationPatchRequest, DiscoveryApplicationResponse>(
+                &ep,
+                Some(body),
+            )
+            .await
+    }
+
+    pub async fn delete_guild_discovery_application(&self, guild_id: Snowflake) -> Result<()> {
+        let ep = Endpoint::new(HttpMethod::Delete, "/guilds/{guild.id}/discovery")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http.request_unit::<()>(&ep, None).await
     }
 
     pub async fn list_emojis(&self, guild_id: Snowflake) -> Result<Vec<GuildEmojiResponse>> {
@@ -314,6 +450,92 @@ pub struct GuildUpdateRequest {
     pub webauthn_response: Option<Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub webauthn_challenge: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GuildCreateRequest {
+    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<Option<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub empty_features: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GuildDeleteRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub password: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mfa_method: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mfa_code: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub webauthn_response: Option<Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub webauthn_challenge: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GuildTransferOwnershipRequest {
+    pub new_owner_id: Snowflake,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub password: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EnabledToggleRequest {
+    pub enabled: bool,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DiscoveryApplicationRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub category_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DiscoveryApplicationPatchRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub category_type: Option<i32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DiscoveryApplicationResponse {
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DiscoveryStatusResponse {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub application: Option<DiscoveryApplicationResponse>,
+    pub eligible: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GuildVanityUrlResponse {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    pub uses: i32,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct GuildVanityUrlUpdateRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<Option<String>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GuildVanityUrlUpdateResponse {
+    pub code: String,
 }
 
 pub type ChannelPositionUpdateRequest = Vec<ChannelPositionUpdateItem>;

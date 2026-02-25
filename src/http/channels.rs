@@ -1,4 +1,5 @@
 use super::messages::MessageResponse;
+use super::webhooks::{WebhookCreateRequest, WebhookResponse};
 use crate::enums::{ChannelType, PermissionOverwriteType};
 use crate::error::Result;
 use crate::flags::Permissions;
@@ -205,6 +206,97 @@ impl ChannelsApi {
         )?;
         self.http.request_unit::<()>(&ep, None).await
     }
+
+    pub async fn get_call_eligibility(
+        &self,
+        channel_id: Snowflake,
+    ) -> Result<CallEligibilityResponse> {
+        let ep = Endpoint::new(HttpMethod::Get, "/channels/{channel.id}/call").compile(
+            &QueryValues::new(),
+            &[("channel.id", &channel_id.to_string())],
+        )?;
+        self.http
+            .request_json::<(), CallEligibilityResponse>(&ep, None)
+            .await
+    }
+
+    pub async fn update_call_region(
+        &self,
+        channel_id: Snowflake,
+        body: &CallUpdateRequest,
+    ) -> Result<()> {
+        let ep = Endpoint::new(HttpMethod::Patch, "/channels/{channel.id}/call").compile(
+            &QueryValues::new(),
+            &[("channel.id", &channel_id.to_string())],
+        )?;
+        self.http
+            .request_unit::<CallUpdateRequest>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn end_call(&self, channel_id: Snowflake) -> Result<()> {
+        let ep = Endpoint::new(HttpMethod::Post, "/channels/{channel.id}/call/end").compile(
+            &QueryValues::new(),
+            &[("channel.id", &channel_id.to_string())],
+        )?;
+        self.http.request_unit::<()>(&ep, None).await
+    }
+
+    pub async fn ring_call(
+        &self,
+        channel_id: Snowflake,
+        body: &CallRingRequest,
+    ) -> Result<()> {
+        let ep = Endpoint::new(HttpMethod::Post, "/channels/{channel.id}/call/ring").compile(
+            &QueryValues::new(),
+            &[("channel.id", &channel_id.to_string())],
+        )?;
+        self.http
+            .request_unit::<CallRingRequest>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn stop_ringing_call(
+        &self,
+        channel_id: Snowflake,
+        body: &CallRingRequest,
+    ) -> Result<()> {
+        let ep =
+            Endpoint::new(HttpMethod::Post, "/channels/{channel.id}/call/stop-ringing").compile(
+                &QueryValues::new(),
+                &[("channel.id", &channel_id.to_string())],
+            )?;
+        self.http
+            .request_unit::<CallRingRequest>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn list_channel_webhooks(
+        &self,
+        channel_id: Snowflake,
+    ) -> Result<Vec<WebhookResponse>> {
+        let ep = Endpoint::new(HttpMethod::Get, "/channels/{channel.id}/webhooks").compile(
+            &QueryValues::new(),
+            &[("channel.id", &channel_id.to_string())],
+        )?;
+        self.http
+            .request_json::<(), Vec<WebhookResponse>>(&ep, None)
+            .await
+    }
+
+    pub async fn create_channel_webhook(
+        &self,
+        channel_id: Snowflake,
+        body: &WebhookCreateRequest,
+    ) -> Result<WebhookResponse> {
+        let ep = Endpoint::new(HttpMethod::Post, "/channels/{channel.id}/webhooks").compile(
+            &QueryValues::new(),
+            &[("channel.id", &channel_id.to_string())],
+        )?;
+        self.http
+            .request_json::<WebhookCreateRequest, WebhookResponse>(&ep, Some(body))
+            .await
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -331,4 +423,22 @@ pub struct RtcRegionResponse {
     pub id: String,
     pub name: String,
     pub emoji: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CallEligibilityResponse {
+    pub ringable: bool,
+    pub silent: bool,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CallUpdateRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub region: Option<Option<String>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CallRingRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recipients: Option<Vec<Snowflake>>,
 }
