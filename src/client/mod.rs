@@ -1,4 +1,4 @@
-use crate::cache::{CachePolicy, Caches};
+use crate::cache::{CachePolicy, CacheUpdater, Caches};
 use crate::error::{Result, StateError};
 use crate::events::{EventCollector, EventPipeline, EventPipelineConfig};
 use crate::gateway::{CompressionMode, GatewayClient, GatewayConfig};
@@ -111,6 +111,8 @@ struct ClientInner {
     events: EventPipeline,
     state: RwLock<ClientState>,
     bind_task: Mutex<Option<JoinHandle<()>>>,
+    cache_updater_task: Mutex<Option<JoinHandle<()>>>,
+    cache_auto_update: bool,
 }
 
 impl Client {
@@ -131,6 +133,7 @@ impl Client {
         options.http.bot_token = Some(token.clone());
         options.gateway.token = token;
 
+        let cache_auto_update = options.cache_policy.auto_update;
         let http = HttpClient::new(options.http)?;
         let gateway = GatewayClient::new(options.gateway);
         let cache = Arc::new(Caches::new(options.cache_policy));
@@ -144,6 +147,8 @@ impl Client {
                 events,
                 state: RwLock::new(ClientState::Idle),
                 bind_task: Mutex::new(None),
+                cache_updater_task: Mutex::new(None),
+                cache_auto_update,
             }),
         })
     }
@@ -225,6 +230,11 @@ impl Client {
             let handle = self.inner.events.bind_gateway(&self.inner.gateway);
             *self.inner.bind_task.lock().await = Some(handle);
         }
+        if self.inner.cache_auto_update && self.inner.cache_updater_task.lock().await.is_none() {
+            let updater = CacheUpdater::new(self.inner.cache.clone());
+            let handle = updater.spawn(self.inner.events.subscribe());
+            *self.inner.cache_updater_task.lock().await = Some(handle);
+        }
 
         *self.inner.state.write().await = ClientState::Ready;
         Ok(())
@@ -244,6 +254,14 @@ impl Client {
         self.inner.http.shutdown().await;
 
         if let Some(handle) = self.inner.bind_task.lock().await.take() {
+            handle.abort();
+            if let Err(err) = handle.await {
+                if err.is_panic() {
+                    std::panic::resume_unwind(err.into_panic());
+                }
+            }
+        }
+        if let Some(handle) = self.inner.cache_updater_task.lock().await.take() {
             handle.abort();
             if let Err(err) = handle.await {
                 if err.is_panic() {
@@ -281,5 +299,25 @@ mod tests {
             crate::error::Error::State(StateError::Missing("token")) => {}
             _ => panic!("wrong error"),
         }
+    }
+
+    #[test]
+    fn cache_auto_update_default() {
+        let client = Client::builder().token("abc").build().expect("build");
+        assert!(client.inner.cache_auto_update);
+    }
+
+    #[test]
+    fn cache_auto_update_off() {
+        let policy = CachePolicy {
+            auto_update: false,
+            ..CachePolicy::default()
+        };
+        let client = Client::builder()
+            .token("abc")
+            .cache_policy(policy)
+            .build()
+            .expect("build");
+        assert!(!client.inner.cache_auto_update);
     }
 }

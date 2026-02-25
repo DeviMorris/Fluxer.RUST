@@ -9,6 +9,7 @@ pub enum CacheKind {
 
 #[derive(Debug, Clone)]
 pub struct CachePolicy {
+    pub auto_update: bool,
     pub guilds: bool,
     pub channels: bool,
     pub roles: bool,
@@ -19,6 +20,7 @@ pub struct CachePolicy {
 impl Default for CachePolicy {
     fn default() -> Self {
         Self {
+            auto_update: true,
             guilds: true,
             channels: true,
             roles: true,
