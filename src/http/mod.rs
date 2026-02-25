@@ -1,3 +1,4 @@
+mod admin;
 mod auth;
 mod channels;
 mod client;
@@ -94,6 +95,8 @@ pub use messages::SendMessageRequest;
 pub use channels::CallEligibilityResponse;
 pub use channels::CallRingRequest;
 pub use channels::CallUpdateRequest;
+pub use admin::AdminApi;
+pub use admin::AdminRequest;
 pub use auth::AuthApi;
 pub use auth::AuthRequest;
 pub use auth::AuthSessionResponse;

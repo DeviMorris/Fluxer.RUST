@@ -3,8 +3,8 @@ use crate::error::{Result, StateError};
 use crate::events::{EventCollector, EventPipeline, EventPipelineConfig};
 use crate::gateway::{CompressionMode, GatewayClient, GatewayConfig};
 use crate::http::{
-    AuthApi, ChannelsApi, GatewayApi, GuildsApi, HttpClient, HttpClientConfig, InteractionsApi,
-    InvitesApi, MembersApi, MessagesApi, RolesApi, UsersApi, WebhooksApi,
+    AdminApi, AuthApi, ChannelsApi, GatewayApi, GuildsApi, HttpClient, HttpClientConfig,
+    InteractionsApi, InvitesApi, MembersApi, MessagesApi, RolesApi, UsersApi, WebhooksApi,
 };
 use crate::oauth2::OAuth2Client;
 use crate::voice::VoiceClient;
@@ -220,6 +220,10 @@ impl Client {
 
     pub fn auth(&self) -> AuthApi {
         AuthApi::new(self.inner.http.clone())
+    }
+
+    pub fn admin(&self) -> AdminApi {
+        AdminApi::new(self.inner.http.clone())
     }
 
     pub fn invites(&self) -> InvitesApi {
