@@ -1,5 +1,6 @@
 use crate::error::Result;
-use crate::http::{AuthPolicy, Endpoint, HttpClient, HttpMethod, QueryValues};
+use crate::flags::MessageFlags;
+use crate::http::{AuthPolicy, Endpoint, HttpClient, HttpMethod, MessageResponse, QueryValues};
 use crate::id::Snowflake;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -130,17 +131,27 @@ impl WebhookClient {
         self.http.request_unit::<()>(&ep, None).await
     }
 
-    pub async fn execute(&self, webhook_id: Snowflake, token: &str, body: &Value) -> Result<()> {
+    pub async fn execute(
+        &self,
+        webhook_id: Snowflake,
+        token: &str,
+        body: &ExecuteWebhookRequest,
+        wait: Option<bool>,
+        thread_id: Option<Snowflake>,
+    ) -> Result<Option<MessageResponse>> {
+        let mut q = QueryValues::new();
+        q.insert_opt("wait", wait);
+        q.insert_opt("thread_id", thread_id);
+
         let ep = Endpoint {
             method: HttpMethod::Post,
             route: "/webhooks/{webhook_id}/{token}",
             auth: AuthPolicy::NoBot,
         }
-        .compile(
-            &QueryValues::new(),
-            &[("webhook_id", &webhook_id.to_string()), ("token", token)],
-        )?;
-        self.http.request_unit(&ep, Some(body)).await
+        .compile(&q, &[("webhook_id", &webhook_id.to_string()), ("token", token)])?;
+        self.http
+            .request_json::<ExecuteWebhookRequest, Option<MessageResponse>>(&ep, Some(body))
+            .await
     }
 
     pub async fn execute_slack(
@@ -148,16 +159,19 @@ impl WebhookClient {
         webhook_id: Snowflake,
         token: &str,
         body: &SlackWebhookRequest,
+        wait: Option<bool>,
+        thread_id: Option<Snowflake>,
     ) -> Result<()> {
+        let mut q = QueryValues::new();
+        q.insert_opt("wait", wait);
+        q.insert_opt("thread_id", thread_id);
+
         let ep = Endpoint {
             method: HttpMethod::Post,
             route: "/webhooks/{webhook_id}/{token}/slack",
             auth: AuthPolicy::NoBot,
         }
-        .compile(
-            &QueryValues::new(),
-            &[("webhook_id", &webhook_id.to_string()), ("token", token)],
-        )?;
+        .compile(&q, &[("webhook_id", &webhook_id.to_string()), ("token", token)])?;
         self.http.request_unit(&ep, Some(body)).await
     }
 
@@ -166,16 +180,19 @@ impl WebhookClient {
         webhook_id: Snowflake,
         token: &str,
         body: &GitHubWebhook,
+        wait: Option<bool>,
+        thread_id: Option<Snowflake>,
     ) -> Result<()> {
+        let mut q = QueryValues::new();
+        q.insert_opt("wait", wait);
+        q.insert_opt("thread_id", thread_id);
+
         let ep = Endpoint {
             method: HttpMethod::Post,
             route: "/webhooks/{webhook_id}/{token}/github",
             auth: AuthPolicy::NoBot,
         }
-        .compile(
-            &QueryValues::new(),
-            &[("webhook_id", &webhook_id.to_string()), ("token", token)],
-        )?;
+        .compile(&q, &[("webhook_id", &webhook_id.to_string()), ("token", token)])?;
         self.http.request_unit(&ep, Some(body)).await
     }
 
@@ -184,16 +201,19 @@ impl WebhookClient {
         webhook_id: Snowflake,
         token: &str,
         body: &SentryWebhook,
+        wait: Option<bool>,
+        thread_id: Option<Snowflake>,
     ) -> Result<()> {
+        let mut q = QueryValues::new();
+        q.insert_opt("wait", wait);
+        q.insert_opt("thread_id", thread_id);
+
         let ep = Endpoint {
             method: HttpMethod::Post,
             route: "/webhooks/{webhook_id}/{token}/sentry",
             auth: AuthPolicy::NoBot,
         }
-        .compile(
-            &QueryValues::new(),
-            &[("webhook_id", &webhook_id.to_string()), ("token", token)],
-        )?;
+        .compile(&q, &[("webhook_id", &webhook_id.to_string()), ("token", token)])?;
         self.http.request_unit(&ep, Some(body)).await
     }
 }
@@ -243,6 +263,24 @@ pub struct WebhookTokenResponse {
     pub token: String,
     #[serde(default)]
     pub avatar: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ExecuteWebhookRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub username: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub embeds: Option<Vec<Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub allowed_mentions: Option<Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub components: Option<Vec<Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flags: Option<MessageFlags>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
