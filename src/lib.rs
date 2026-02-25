@@ -1,6 +1,7 @@
 pub mod enums;
 pub mod error;
 pub mod flags;
+pub mod gateway;
 pub mod http;
 pub mod id;
 pub mod ser;
