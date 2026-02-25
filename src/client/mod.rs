@@ -3,8 +3,9 @@ use crate::error::{Result, StateError};
 use crate::events::{EventCollector, EventPipeline, EventPipelineConfig};
 use crate::gateway::{CompressionMode, GatewayClient, GatewayConfig};
 use crate::http::{
-    AdminApi, AuthApi, ChannelsApi, GatewayApi, GuildsApi, HttpClient, HttpClientConfig,
-    InteractionsApi, InvitesApi, MembersApi, MessagesApi, RolesApi, UsersApi, WebhooksApi,
+    AdminApi, ApplicationsApi, AuthApi, ChannelsApi, DiscoveryApi, GatewayApi, GiftsApi,
+    GuildsApi, HttpClient, HttpClientConfig, InteractionsApi, InvitesApi, MembersApi, MessagesApi,
+    ReadStatesApi, ReportsApi, RolesApi, SearchApi, UsersApi, WebhooksApi, WellKnownApi,
 };
 use crate::oauth2::OAuth2Client;
 use crate::voice::VoiceClient;
@@ -236,6 +237,34 @@ impl Client {
 
     pub fn interactions(&self) -> InteractionsApi {
         InteractionsApi::new(self.inner.http.clone())
+    }
+
+    pub fn search(&self) -> SearchApi {
+        SearchApi::new(self.inner.http.clone())
+    }
+
+    pub fn reports(&self) -> ReportsApi {
+        ReportsApi::new(self.inner.http.clone())
+    }
+
+    pub fn read_states(&self) -> ReadStatesApi {
+        ReadStatesApi::new(self.inner.http.clone())
+    }
+
+    pub fn discovery(&self) -> DiscoveryApi {
+        DiscoveryApi::new(self.inner.http.clone())
+    }
+
+    pub fn gifts(&self) -> GiftsApi {
+        GiftsApi::new(self.inner.http.clone())
+    }
+
+    pub fn applications(&self) -> ApplicationsApi {
+        ApplicationsApi::new(self.inner.http.clone())
+    }
+
+    pub fn well_known(&self) -> WellKnownApi {
+        WellKnownApi::new(self.inner.http.clone())
     }
 
     pub async fn state(&self) -> ClientState {
