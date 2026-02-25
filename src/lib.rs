@@ -47,4 +47,7 @@ pub use http::RetryPolicy;
 pub use id::Snowflake;
 pub use oauth2::OAuth2Client;
 pub use voice::VoiceClient;
+pub use voice::VoiceServerHandshake;
+pub use voice::VoiceSession;
+pub use voice::VoiceStateHandshake;
 pub use webhook::WebhookClient;
