@@ -52,6 +52,30 @@ impl GuildsApi {
             .await
     }
 
+    pub async fn update_channel_positions(
+        &self,
+        guild_id: Snowflake,
+        body: &ChannelPositionUpdateRequest,
+    ) -> Result<()> {
+        let ep = Endpoint::new(HttpMethod::Patch, "/guilds/{guild.id}/channels")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_unit::<ChannelPositionUpdateRequest>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn update_role_positions(
+        &self,
+        guild_id: Snowflake,
+        body: &GuildRolePositionsRequest,
+    ) -> Result<()> {
+        let ep = Endpoint::new(HttpMethod::Patch, "/guilds/{guild.id}/roles")
+            .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
+        self.http
+            .request_unit::<GuildRolePositionsRequest>(&ep, Some(body))
+            .await
+    }
+
     pub async fn list_bans(&self, guild_id: Snowflake) -> Result<Vec<GuildBanResponse>> {
         let ep = Endpoint::new(HttpMethod::Get, "/guilds/{guild.id}/bans")
             .compile(&QueryValues::new(), &[("guild.id", &guild_id.to_string())])?;
@@ -290,6 +314,30 @@ pub struct GuildUpdateRequest {
     pub webauthn_response: Option<Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub webauthn_challenge: Option<String>,
+}
+
+pub type ChannelPositionUpdateRequest = Vec<ChannelPositionUpdateItem>;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChannelPositionUpdateItem {
+    pub id: Snowflake,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_id: Option<Option<Snowflake>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub preceding_sibling_id: Option<Option<Snowflake>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lock_permissions: Option<bool>,
+}
+
+pub type GuildRolePositionsRequest = Vec<GuildRolePositionItem>;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GuildRolePositionItem {
+    pub id: Snowflake,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
