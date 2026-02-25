@@ -13,5 +13,3 @@ pub use dispatch::DispatchEnvelope;
 pub use dispatch::DispatchEvent;
 pub use dispatch::UnknownDispatchEvent;
 pub use dispatch::decode_dispatch;
-pub use rate_limiter::OutboundKind;
-pub use rate_limiter::OutboundRateLimiter;

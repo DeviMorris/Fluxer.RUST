@@ -90,6 +90,9 @@ pub struct GatewayEvent {
 }
 
 #[derive(Debug, Clone)]
+/// Gateway transport client for Fluxer websocket sessions.
+///
+/// Manages websocket connect/reconnect, heartbeat/resume and outbound command flow.
 pub struct GatewayClient {
     inner: Arc<Inner>,
 }
@@ -343,6 +346,17 @@ async fn run_connection(
                                 }),
                             ).await?;
                         }
+                    }
+                    1 => {
+                        let seq = inner.resume.read().await.as_ref().map(|r| r.seq);
+                        send_command(
+                            transport,
+                            limiter,
+                            &inner.shutdown,
+                            OutboundKind::Internal,
+                            1,
+                            seq.map_or(Value::Null, Value::from),
+                        ).await?;
                     }
                     0 => {
                         if let Some(seq) = event.s {

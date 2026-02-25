@@ -257,4 +257,12 @@ mod tests {
         let got = retry_after(&headers).expect("retry after");
         assert_eq!(got, Duration::from_millis(2500));
     }
+
+    #[test]
+    fn retry_after_header() {
+        let mut headers = reqwest::header::HeaderMap::new();
+        headers.insert("retry-after", "3".parse().expect("header"));
+        let got = retry_after(&headers).expect("retry after");
+        assert_eq!(got, Duration::from_secs(3));
+    }
 }

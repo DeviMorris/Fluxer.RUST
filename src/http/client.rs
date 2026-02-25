@@ -9,6 +9,10 @@ use tokio::sync::Notify;
 use tokio::time::{Duration, sleep};
 
 #[derive(Debug, Clone)]
+/// Async HTTP client used by Fluxer services.
+///
+/// Owns a single `reqwest::Client` instance, rate-limit coordination,
+/// retry policy and graceful shutdown state.
 pub struct HttpClient {
     inner: reqwest::Client,
     cfg: Arc<HttpClientConfig>,
@@ -338,16 +342,20 @@ fn map_reqwest_error(err: reqwest::Error) -> Error {
 async fn parse_api_error(response: reqwest::Response) -> Error {
     let status = response.status().as_u16();
     let bytes = response.bytes().await.unwrap_or_default();
+    parse_api_error_parts(status, &bytes)
+}
+
+fn parse_api_error_parts(status: u16, bytes: &[u8]) -> Error {
     #[derive(serde::Deserialize)]
     struct ApiBody {
         code: Option<i64>,
         message: Option<String>,
     }
-    let payload: Option<ApiBody> = serde_json::from_slice(&bytes).ok();
+    let payload: Option<ApiBody> = serde_json::from_slice(bytes).ok();
     let message = payload
         .as_ref()
         .and_then(|v| v.message.clone())
-        .unwrap_or_else(|| String::from_utf8_lossy(&bytes).to_string());
+        .unwrap_or_else(|| String::from_utf8_lossy(bytes).to_string());
     let code = payload.and_then(|v| v.code);
     Error::Api(ApiError::new(status, code, message))
 }
@@ -370,5 +378,31 @@ mod tests {
             max_delay: Duration::from_secs(3),
         };
         assert_eq!(p.backoff(5), Duration::from_secs(3));
+    }
+
+    #[test]
+    fn api_parse_json() {
+        let err = parse_api_error_parts(400, br#"{"code":10008,"message":"Unknown Message"}"#);
+        match err {
+            Error::Api(v) => {
+                assert_eq!(v.status, 400);
+                assert_eq!(v.code, Some(10008));
+                assert_eq!(v.message, "Unknown Message");
+            }
+            _ => panic!("wrong error"),
+        }
+    }
+
+    #[test]
+    fn api_parse_text() {
+        let err = parse_api_error_parts(502, b"Bad Gateway");
+        match err {
+            Error::Api(v) => {
+                assert_eq!(v.status, 502);
+                assert_eq!(v.code, None);
+                assert_eq!(v.message, "Bad Gateway");
+            }
+            _ => panic!("wrong error"),
+        }
     }
 }

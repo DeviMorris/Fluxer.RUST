@@ -4,13 +4,13 @@ use tokio::sync::Notify;
 use tokio::time::sleep;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum OutboundKind {
+pub(crate) enum OutboundKind {
     Normal,
     Internal,
 }
 
 #[derive(Debug, Clone)]
-pub struct OutboundRateLimiter {
+pub(crate) struct OutboundRateLimiter {
     commands_per_minute: u32,
     reserved_slots: u32,
     window_start: Instant,
@@ -18,7 +18,7 @@ pub struct OutboundRateLimiter {
 }
 
 impl OutboundRateLimiter {
-    pub fn new(commands_per_minute: u32, reserved_slots: u32) -> Self {
+    pub(crate) fn new(commands_per_minute: u32, reserved_slots: u32) -> Self {
         Self {
             commands_per_minute,
             reserved_slots,
@@ -27,12 +27,12 @@ impl OutboundRateLimiter {
         }
     }
 
-    pub fn reset(&mut self) {
+    pub(crate) fn reset(&mut self) {
         self.window_start = Instant::now();
-        self.remaining = 0;
+        self.remaining = self.commands_per_minute as i32;
     }
 
-    pub async fn wait(&mut self, kind: OutboundKind, shutdown: &Notify) -> Result<()> {
+    pub(crate) async fn wait(&mut self, kind: OutboundKind, shutdown: &Notify) -> Result<()> {
         loop {
             let now = Instant::now();
             if now.duration_since(self.window_start) >= Duration::from_secs(60) {
@@ -89,5 +89,13 @@ mod tests {
             .wait(OutboundKind::Internal, &notify)
             .await
             .expect("internal slot");
+    }
+
+    #[test]
+    fn reset_refills() {
+        let mut limiter = OutboundRateLimiter::new(7, 2);
+        limiter.remaining = 0;
+        limiter.reset();
+        assert_eq!(limiter.remaining, 7);
     }
 }

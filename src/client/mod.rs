@@ -94,6 +94,10 @@ impl ClientBuilder {
 }
 
 #[derive(Clone)]
+/// High-level Fluxer client that wires HTTP, Gateway, Cache and Event pipeline.
+///
+/// Build via [`ClientBuilder`] and control runtime lifecycle with [`Client::open`]
+/// and [`Client::close`].
 pub struct Client {
     inner: Arc<ClientInner>,
 }
@@ -247,7 +251,10 @@ mod tests {
 
     #[test]
     fn missing_token() {
-        let err = Client::builder().build().expect_err("error");
+        let err = match Client::builder().build() {
+            Ok(_) => panic!("expected error"),
+            Err(err) => err,
+        };
         match err {
             crate::error::Error::State(StateError::Missing("token")) => {}
             _ => panic!("wrong error"),

@@ -203,16 +203,16 @@ async fn dispatch_one(inner: &Arc<Inner>, event: DispatchEnvelope) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::gateway::{DispatchEvent, ReadyPayload};
-    use serde_json::Map;
+    use crate::gateway::{DispatchEvent, UnknownDispatchEvent};
+    use serde_json::json;
     use tokio::sync::oneshot;
 
     fn ready(seq: u64) -> DispatchEnvelope {
         DispatchEnvelope {
             seq,
-            event: DispatchEvent::Ready(ReadyPayload {
-                session_id: "s".to_owned(),
-                extra: Map::new(),
+            event: DispatchEvent::Unknown(UnknownDispatchEvent {
+                event_type: "READY".to_owned(),
+                raw: json!({"session_id":"s"}),
             }),
         }
     }
