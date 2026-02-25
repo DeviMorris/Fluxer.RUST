@@ -6,6 +6,7 @@ use crate::http::{
     AdminApi, ApplicationsApi, AuthApi, ChannelsApi, DiscoveryApi, GatewayApi, GiftsApi,
     GuildsApi, HttpClient, HttpClientConfig, InteractionsApi, InvitesApi, MembersApi, MessagesApi,
     ReadStatesApi, ReportsApi, RolesApi, SearchApi, UsersApi, WebhooksApi, WellKnownApi,
+    PremiumApi, PacksApi, StripeApi, DonationsApi, TenorApi, KlipyApi, StreamsApi,
 };
 use crate::oauth2::OAuth2Client;
 use crate::voice::VoiceClient;
@@ -265,6 +266,34 @@ impl Client {
 
     pub fn well_known(&self) -> WellKnownApi {
         WellKnownApi::new(self.inner.http.clone())
+    }
+
+    pub fn premium(&self) -> PremiumApi {
+        PremiumApi::new(self.inner.http.clone())
+    }
+
+    pub fn packs(&self) -> PacksApi {
+        PacksApi::new(self.inner.http.clone())
+    }
+
+    pub fn stripe(&self) -> StripeApi {
+        StripeApi::new(self.inner.http.clone())
+    }
+
+    pub fn donations(&self) -> DonationsApi {
+        DonationsApi::new(self.inner.http.clone())
+    }
+
+    pub fn tenor(&self) -> TenorApi {
+        TenorApi::new(self.inner.http.clone())
+    }
+
+    pub fn klipy(&self) -> KlipyApi {
+        KlipyApi::new(self.inner.http.clone())
+    }
+
+    pub fn streams(&self) -> StreamsApi {
+        StreamsApi::new(self.inner.http.clone())
     }
 
     pub async fn state(&self) -> ClientState {
