@@ -2,6 +2,7 @@ use crate::error::Result;
 use crate::http::{AuthPolicy, Endpoint, HttpClient, HttpMethod, QueryValues};
 use crate::id::Snowflake;
 use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
 
 #[derive(Debug, Clone)]
 pub struct OAuth2Client {
@@ -89,6 +90,123 @@ impl OAuth2Client {
             .compile(&QueryValues::new(), &[("id", &id.to_string())])?;
         self.http
             .request_json::<(), ApplicationPublicResponse>(&ep, None)
+            .await
+    }
+
+    pub async fn get_authorizations(&self) -> Result<Vec<OAuth2AuthorizationResponse>> {
+        let ep = Endpoint::new(HttpMethod::Get, "/oauth2/@me/authorizations")
+            .compile(&QueryValues::new(), &[])?;
+        self.http
+            .request_json::<(), Vec<OAuth2AuthorizationResponse>>(&ep, None)
+            .await
+    }
+
+    pub async fn delete_authorization(&self, application_id: Snowflake) -> Result<()> {
+        let ep =
+            Endpoint::new(HttpMethod::Delete, "/oauth2/@me/authorizations/{applicationId}")
+                .compile(
+                    &QueryValues::new(),
+                    &[("applicationId", &application_id.to_string())],
+                )?;
+        self.http.request_unit::<()>(&ep, None).await
+    }
+
+    pub async fn get_my_applications(&self) -> Result<Vec<OAuthApplicationResponse>> {
+        let ep = Endpoint::new(HttpMethod::Get, "/oauth2/applications/@me")
+            .compile(&QueryValues::new(), &[])?;
+        self.http
+            .request_json::<(), Vec<OAuthApplicationResponse>>(&ep, None)
+            .await
+    }
+
+    pub async fn authorize_consent(
+        &self,
+        body: &OAuthConsentRequest,
+    ) -> Result<OAuthConsentResponse> {
+        let ep = Endpoint::new(HttpMethod::Post, "/oauth2/authorize/consent")
+            .compile(&QueryValues::new(), &[])?;
+        self.http
+            .request_json::<OAuthConsentRequest, OAuthConsentResponse>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn create_application(
+        &self,
+        body: &OAuthApplicationCreateRequest,
+    ) -> Result<OAuthApplicationResponse> {
+        let ep = Endpoint::new(HttpMethod::Post, "/oauth2/applications")
+            .compile(&QueryValues::new(), &[])?;
+        self.http
+            .request_json::<OAuthApplicationCreateRequest, OAuthApplicationResponse>(
+                &ep,
+                Some(body),
+            )
+            .await
+    }
+
+    pub async fn get_application(&self, id: Snowflake) -> Result<OAuthApplicationResponse> {
+        let ep = Endpoint::new(HttpMethod::Get, "/oauth2/applications/{id}")
+            .compile(&QueryValues::new(), &[("id", &id.to_string())])?;
+        self.http
+            .request_json::<(), OAuthApplicationResponse>(&ep, None)
+            .await
+    }
+
+    pub async fn update_application(
+        &self,
+        id: Snowflake,
+        body: &OAuthApplicationUpdateRequest,
+    ) -> Result<OAuthApplicationResponse> {
+        let ep = Endpoint::new(HttpMethod::Patch, "/oauth2/applications/{id}")
+            .compile(&QueryValues::new(), &[("id", &id.to_string())])?;
+        self.http
+            .request_json::<OAuthApplicationUpdateRequest, OAuthApplicationResponse>(
+                &ep,
+                Some(body),
+            )
+            .await
+    }
+
+    pub async fn delete_application(&self, id: Snowflake) -> Result<()> {
+        let ep = Endpoint::new(HttpMethod::Delete, "/oauth2/applications/{id}")
+            .compile(&QueryValues::new(), &[("id", &id.to_string())])?;
+        self.http.request_unit::<()>(&ep, None).await
+    }
+
+    pub async fn update_bot(
+        &self,
+        id: Snowflake,
+        body: &OAuthBotProfileUpdateRequest,
+    ) -> Result<OAuthApplicationResponse> {
+        let ep = Endpoint::new(HttpMethod::Patch, "/oauth2/applications/{id}/bot")
+            .compile(&QueryValues::new(), &[("id", &id.to_string())])?;
+        self.http
+            .request_json::<OAuthBotProfileUpdateRequest, OAuthApplicationResponse>(
+                &ep,
+                Some(body),
+            )
+            .await
+    }
+
+    pub async fn reset_bot_token(&self, id: Snowflake) -> Result<OAuthBotTokenResetResponse> {
+        let ep = Endpoint::new(HttpMethod::Post, "/oauth2/applications/{id}/bot/reset-token")
+            .compile(&QueryValues::new(), &[("id", &id.to_string())])?;
+        self.http
+            .request_json::<(), OAuthBotTokenResetResponse>(&ep, None)
+            .await
+    }
+
+    pub async fn reset_client_secret(
+        &self,
+        id: Snowflake,
+    ) -> Result<OAuthClientSecretResetResponse> {
+        let ep = Endpoint::new(
+            HttpMethod::Post,
+            "/oauth2/applications/{id}/client-secret/reset",
+        )
+        .compile(&QueryValues::new(), &[("id", &id.to_string())])?;
+        self.http
+            .request_json::<(), OAuthClientSecretResetResponse>(&ep, None)
             .await
     }
 }
@@ -236,3 +354,125 @@ pub struct ApplicationBotResponse {
     #[serde(default)]
     pub bio: Option<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OAuth2AuthorizationResponse {
+    pub application: OAuth2AuthorizationApplication,
+    #[serde(default)]
+    pub scopes: Vec<String>,
+    pub authorized_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OAuth2AuthorizationApplication {
+    pub id: Snowflake,
+    pub name: String,
+    #[serde(default)]
+    pub icon: Option<String>,
+    #[serde(default)]
+    pub description: Option<String>,
+    pub bot_public: bool,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OAuthApplicationCreateRequest {
+    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub redirect_uris: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_public: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_require_code_grant: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OAuthApplicationUpdateRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub redirect_uris: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_public: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_require_code_grant: Option<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OAuthApplicationResponse {
+    pub id: Snowflake,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub redirect_uris: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_public: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_require_code_grant: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_secret: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flags: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot: Option<ApplicationBotResponse>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub username: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discriminator: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub banner: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bio: Option<String>,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OAuthConsentRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub response_type: Option<String>,
+    pub client_id: Snowflake,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub redirect_uri: Option<String>,
+    pub scope: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub permissions: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub guild_id: Option<Snowflake>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OAuthConsentResponse {
+    pub redirect_to: String,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct OAuthBotProfileUpdateRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub username: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discriminator: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub banner: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bio: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bot_flags: Option<i32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OAuthBotTokenResetResponse {
+    pub token: String,
+    pub bot: ApplicationBotResponse,
+}
+
+pub type OAuthClientSecretResetResponse = OAuthApplicationResponse;
