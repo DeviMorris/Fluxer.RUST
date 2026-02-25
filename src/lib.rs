@@ -1,3 +1,4 @@
+pub mod cache;
 pub mod enums;
 pub mod error;
 pub mod events;
