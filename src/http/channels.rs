@@ -1,9 +1,11 @@
 use super::messages::MessageResponse;
-use crate::enums::ChannelType;
+use crate::enums::{ChannelType, PermissionOverwriteType};
 use crate::error::Result;
+use crate::flags::Permissions;
 use crate::http::{Endpoint, HttpClient, HttpMethod, QueryValues};
 use crate::id::Snowflake;
 use crate::tri::Patch;
+use crate::union::PartialUser;
 use crate::union::PermissionOverwrite;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
@@ -81,6 +83,69 @@ impl ChannelsApi {
             .request_json::<(), Vec<MessageResponse>>(&ep, None)
             .await
     }
+
+    pub async fn get_invites(&self, channel_id: Snowflake) -> Result<Vec<InviteResponse>> {
+        let ep = Endpoint::new(HttpMethod::Get, "/channels/{channel.id}/invites").compile(
+            &QueryValues::new(),
+            &[("channel.id", &channel_id.to_string())],
+        )?;
+        self.http
+            .request_json::<(), Vec<InviteResponse>>(&ep, None)
+            .await
+    }
+
+    pub async fn create_invite(
+        &self,
+        channel_id: Snowflake,
+        body: &ChannelInviteCreateRequest,
+    ) -> Result<InviteResponse> {
+        let ep = Endpoint::new(HttpMethod::Post, "/channels/{channel.id}/invites").compile(
+            &QueryValues::new(),
+            &[("channel.id", &channel_id.to_string())],
+        )?;
+        self.http
+            .request_json::<ChannelInviteCreateRequest, InviteResponse>(&ep, Some(body))
+            .await
+    }
+
+    pub async fn update_permission_overwrite(
+        &self,
+        channel_id: Snowflake,
+        overwrite_id: Snowflake,
+        body: &PermissionOverwriteCreateRequest,
+    ) -> Result<()> {
+        let ep = Endpoint::new(
+            HttpMethod::Put,
+            "/channels/{channel.id}/permissions/{overwrite.id}",
+        )
+        .compile(
+            &QueryValues::new(),
+            &[
+                ("channel.id", &channel_id.to_string()),
+                ("overwrite.id", &overwrite_id.to_string()),
+            ],
+        )?;
+        self.http.request_unit(&ep, Some(body)).await
+    }
+
+    pub async fn delete_permission_overwrite(
+        &self,
+        channel_id: Snowflake,
+        overwrite_id: Snowflake,
+    ) -> Result<()> {
+        let ep = Endpoint::new(
+            HttpMethod::Delete,
+            "/channels/{channel.id}/permissions/{overwrite.id}",
+        )
+        .compile(
+            &QueryValues::new(),
+            &[
+                ("channel.id", &channel_id.to_string()),
+                ("overwrite.id", &overwrite_id.to_string()),
+            ],
+        )?;
+        self.http.request_unit::<()>(&ep, None).await
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -151,4 +216,53 @@ pub struct ChannelResponse {
     pub permission_overwrites: Vec<PermissionOverwrite>,
     #[serde(flatten)]
     pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ChannelInviteCreateRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_uses: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_age: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unique: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub temporary: Option<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InviteResponse {
+    pub code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uses: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_uses: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_age: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub temporary: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expires_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inviter: Option<PartialUser>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub channel: Option<Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub guild: Option<Value>,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PermissionOverwriteCreateRequest {
+    #[serde(rename = "type")]
+    pub kind: PermissionOverwriteType,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub allow: Option<Permissions>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deny: Option<Permissions>,
 }

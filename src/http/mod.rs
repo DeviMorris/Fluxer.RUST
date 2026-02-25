@@ -7,10 +7,13 @@ mod messages;
 mod rate_limiter;
 mod roles;
 
+pub use channels::ChannelInviteCreateRequest;
 pub use channels::ChannelResponse;
 pub use channels::ChannelsApi;
 pub use channels::CreateChannelRequest;
+pub use channels::InviteResponse;
 pub use channels::ListChannelMessagesQuery;
+pub use channels::PermissionOverwriteCreateRequest;
 pub use channels::UpdateChannelRequest;
 pub use client::HttpClient;
 pub use client::HttpClientConfig;
