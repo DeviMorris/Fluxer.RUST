@@ -1,6 +1,6 @@
 [package]
 name = "fluxer-rust"
-version = "0.1.0-alpha.1"
+version = "0.1.0-beta.1"
 edition = "2024"
 
 [dependencies]
@@ -17,3 +17,6 @@ futures-util = "0.3"
 flate2 = "1"
 zstd = "0.13"
 dashmap = "6"
+
+[dev-dependencies]
+wiremock = "0.6"

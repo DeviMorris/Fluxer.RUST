@@ -371,11 +371,13 @@ mod tests {
 
     #[test]
     fn builder_token() {
-        let client = Client::builder().token("abc").build().expect("build");
         let rt = tokio::runtime::Builder::new_current_thread()
             .enable_all()
             .build()
             .expect("rt");
+        let client = rt
+            .block_on(async { Client::builder().token("abc").build() })
+            .expect("build");
         let state = rt.block_on(client.state());
         assert_eq!(state, ClientState::Idle);
     }
@@ -394,7 +396,13 @@ mod tests {
 
     #[test]
     fn cache_auto_update_default() {
-        let client = Client::builder().token("abc").build().expect("build");
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("rt");
+        let client = rt
+            .block_on(async { Client::builder().token("abc").build() })
+            .expect("build");
         assert!(client.inner.cache_auto_update);
     }
 
@@ -404,10 +412,17 @@ mod tests {
             auto_update: false,
             ..CachePolicy::default()
         };
-        let client = Client::builder()
-            .token("abc")
-            .cache_policy(policy)
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
             .build()
+            .expect("rt");
+        let client = rt
+            .block_on(async {
+                Client::builder()
+                    .token("abc")
+                    .cache_policy(policy)
+                    .build()
+            })
             .expect("build");
         assert!(!client.inner.cache_auto_update);
     }

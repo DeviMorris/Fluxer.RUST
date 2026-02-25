@@ -21,6 +21,7 @@ fn make_http(base_url: String) -> HttpClient {
             base_delay: Duration::from_millis(1),
             max_delay: Duration::from_millis(10),
         },
+        allow_env_proxy: false,
     };
     HttpClient::new(cfg).expect("http client")
 }

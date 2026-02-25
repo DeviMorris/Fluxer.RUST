@@ -160,6 +160,38 @@ pub struct AuthRequest {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuthSessionResponse {
+    pub id_hash: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_info: Option<AuthSessionClientInfo>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approx_last_used_at: Option<String>,
+    pub current: bool,
     #[serde(flatten)]
-    pub raw: Map<String, Value>,
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AuthSessionClientInfo {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub platform: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub os: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub browser: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location: Option<AuthSessionLocation>,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AuthSessionLocation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub region: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country: Option<String>,
+    #[serde(flatten)]
+    pub extra: Map<String, Value>,
 }

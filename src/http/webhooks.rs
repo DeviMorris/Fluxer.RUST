@@ -227,18 +227,13 @@ pub struct WebhookTokenUpdateRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WebhookResponse {
     pub id: Snowflake,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub guild_id: Option<Snowflake>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub channel_id: Option<Snowflake>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub name: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub token: Option<String>,
+    pub guild_id: Snowflake,
+    pub channel_id: Snowflake,
+    pub name: String,
+    pub token: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub avatar: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user: Option<Value>,
+    pub user: Value,
     #[serde(flatten)]
     pub extra: serde_json::Map<String, Value>,
 }
@@ -246,14 +241,10 @@ pub struct WebhookResponse {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WebhookTokenResponse {
     pub id: Snowflake,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub guild_id: Option<Snowflake>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub channel_id: Option<Snowflake>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub name: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub token: Option<String>,
+    pub guild_id: Snowflake,
+    pub channel_id: Snowflake,
+    pub name: String,
+    pub token: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub avatar: Option<String>,
     #[serde(flatten)]

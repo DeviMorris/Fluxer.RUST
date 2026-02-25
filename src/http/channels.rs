@@ -395,6 +395,10 @@ pub struct InviteResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub temporary: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub member_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub presence_count: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub created_at: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<String>,
@@ -433,8 +437,8 @@ pub struct CallEligibilityResponse {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CallUpdateRequest {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub region: Option<Option<String>>,
+    #[serde(default, skip_serializing_if = "Patch::is_omitted")]
+    pub region: Patch<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

@@ -27,6 +27,7 @@ pub struct HttpClientConfig {
     pub user_agent: String,
     pub timeout: Duration,
     pub retry: RetryPolicy,
+    pub allow_env_proxy: bool,
 }
 
 impl Default for HttpClientConfig {
@@ -37,6 +38,7 @@ impl Default for HttpClientConfig {
             user_agent: format!("fluxer-rust/{}", env!("CARGO_PKG_VERSION")),
             timeout: Duration::from_secs(20),
             retry: RetryPolicy::default(),
+            allow_env_proxy: true,
         }
     }
 }
@@ -76,11 +78,13 @@ impl HttpClient {
                 .map_err(|e| TransportError::Other(format!("invalid user-agent: {e}")))?,
         );
 
-        let client = reqwest::Client::builder()
+        let mut builder = reqwest::Client::builder()
             .default_headers(headers)
-            .timeout(cfg.timeout)
-            .build()
-            .map_err(map_reqwest_error)?;
+            .timeout(cfg.timeout);
+        if !cfg.allow_env_proxy {
+            builder = builder.no_proxy();
+        }
+        let client = builder.build().map_err(map_reqwest_error)?;
 
         Ok(Self {
             inner: client,

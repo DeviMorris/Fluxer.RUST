@@ -416,11 +416,11 @@ impl UsersApi {
         self.http.request_unit::<()>(&ep, None).await
     }
 
-    pub async fn list_push_subscriptions(&self) -> Result<Vec<PushSubscriptionResponse>> {
+    pub async fn list_push_subscriptions(&self) -> Result<PushSubscriptionsListResponse> {
         let ep = Endpoint::new(HttpMethod::Get, "/users/@me/push/subscriptions")
             .compile(&QueryValues::new(), &[])?;
         self.http
-            .request_json::<(), Vec<PushSubscriptionResponse>>(&ep, None)
+            .request_json::<(), PushSubscriptionsListResponse>(&ep, None)
             .await
     }
 
@@ -1139,11 +1139,20 @@ pub struct ScheduledMessageUpdateRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PushSubscriptionResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    #[serde(rename = "subscription_id", alias = "id")]
+    pub subscription_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub endpoint: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_agent: Option<Value>,
     #[serde(flatten)]
     pub extra: Map<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PushSubscriptionsListResponse {
+    #[serde(default)]
+    pub subscriptions: Vec<PushSubscriptionResponse>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

@@ -3,6 +3,7 @@ use crate::error::{StateError, TransportError};
 use crate::gateway::{DispatchEvent, GatewayClient};
 use crate::http::{AuthPolicy, Endpoint, HttpClient, HttpMethod, QueryValues};
 use crate::id::Snowflake;
+use crate::tri::Patch;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::sync::Arc;
@@ -260,8 +261,8 @@ pub struct CallEligibilityResponse {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CallUpdateBody {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub region: Option<String>,
+    #[serde(default, skip_serializing_if = "Patch::is_omitted")]
+    pub region: Patch<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
