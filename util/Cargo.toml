@@ -1,0 +1,9 @@
+[package]
+name = "fluxer-util"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+bitflags = { workspace = true }
