@@ -1,0 +1,19 @@
+[package]
+name = "fluxer-rest"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "HTTP REST client for the Fluxer bot API"
+keywords = ["fluxer", "discord", "bot", "http", "rest"]
+categories = ["api-bindings", "web-programming::http-client"]
+
+[dependencies]
+fluxer-types = { path = "../types", version = "0.1" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

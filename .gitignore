@@ -1,0 +1,7 @@
+target/
+Cargo.lock
+.env
+*.pdb
+*.log
+.idea/
+.vscode/

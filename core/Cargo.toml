@@ -1,0 +1,23 @@
+[package]
+name = "fluxer-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Rust API library for building Fluxer bots — high-level client, event system, and structures"
+keywords = ["fluxer", "discord", "bot", "async", "framework"]
+categories = ["api-bindings", "asynchronous"]
+
+[dependencies]
+fluxer-types = { path = "../types", version = "0.1" }
+fluxer-rest = { path = "../rest", version = "0.1" }
+fluxer-ws = { path = "../ws", version = "0.1" }
+fluxer-builders = { path = "../builders", version = "0.1" }
+fluxer-util = { path = "../util", version = "0.1" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+dashmap = { workspace = true }

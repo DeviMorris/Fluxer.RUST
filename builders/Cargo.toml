@@ -1,0 +1,17 @@
+[package]
+name = "fluxer-builders"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Message and embed builder utilities for the Fluxer bot framework"
+keywords = ["fluxer", "discord", "bot", "builder", "embed"]
+categories = ["api-bindings"]
+
+[dependencies]
+fluxer-types = { path = "../types", version = "0.1" }
+fluxer-util = { path = "../util", version = "0.1" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true }
