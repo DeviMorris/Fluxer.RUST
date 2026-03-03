@@ -200,7 +200,7 @@ checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
 name = "fluxer-builders"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "fluxer-types",
  "fluxer-util",
@@ -211,7 +211,7 @@ dependencies = [
 
 [[package]]
 name = "fluxer-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "dashmap",
  "fluxer-builders",
@@ -228,7 +228,7 @@ dependencies = [
 
 [[package]]
 name = "fluxer-rest"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "fluxer-types",
  "reqwest",
@@ -241,7 +241,7 @@ dependencies = [
 
 [[package]]
 name = "fluxer-types"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -250,7 +250,7 @@ dependencies = [
 
 [[package]]
 name = "fluxer-util"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bitflags",
  "serde",
@@ -258,7 +258,7 @@ dependencies = [
 
 [[package]]
 name = "fluxer-ws"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "fluxer-rest",
  "fluxer-types",
