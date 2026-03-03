@@ -5,7 +5,7 @@
 [![Crates.io](https://img.shields.io/crates/v/fluxer-core)](https://crates.io/crates/fluxer-core)
 [![Docs](https://img.shields.io/badge/docs-docs.devimorris.tech-blue)](https://docs.devimorris.tech)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Community](https://img.shields.io/badge/community-join-7289da)](https://fluxer.gg/2bkFSWcs)
+[![Community](https://img.shields.io/badge/community-join-7289da)](https://fluxer.gg/J1M6Bd0G)
 
 Rust library for building bots on the [Fluxer](https://fluxer.app) platform.
 
@@ -117,7 +117,7 @@ async fn main() {
 
 ## Community
 
-[Fluxer.RUST Community](https://fluxer.gg/2bkFSWcs)
+[Fluxer.RUST Community](https://fluxer.gg/J1M6Bd0G)
 
 ---
 
