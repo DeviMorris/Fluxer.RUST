@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::user::ApiUser;
 use crate::Snowflake;
+use crate::user::ApiUser;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ApiEmoji {

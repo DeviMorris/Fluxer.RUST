@@ -1,5 +1,5 @@
-use fluxer_types::webhook::ApiWebhook;
 use fluxer_types::Snowflake;
+use fluxer_types::webhook::ApiWebhook;
 
 use crate::structures::user::User;
 use crate::util::cdn::{self, CdnOptions};
@@ -86,13 +86,15 @@ impl Webhook {
             .as_deref()
             .ok_or(crate::Error::WebhookTokenRequired)?;
         let route = if wait {
-            format!("{}?wait=true", fluxer_types::Routes::webhook_execute(&self.id, token))
+            format!(
+                "{}?wait=true",
+                fluxer_types::Routes::webhook_execute(&self.id, token)
+            )
         } else {
             fluxer_types::Routes::webhook_execute(&self.id, token)
         };
         if wait {
-            let msg: fluxer_types::message::ApiMessage =
-                rest.post(&route, Some(body)).await?;
+            let msg: fluxer_types::message::ApiMessage = rest.post(&route, Some(body)).await?;
             Ok(Some(msg))
         } else {
             let _: serde_json::Value = rest.post(&route, Some(body)).await?;
@@ -112,14 +114,16 @@ impl Webhook {
             .as_deref()
             .ok_or(crate::Error::WebhookTokenRequired)?;
         let route = if wait {
-            format!("{}?wait=true", fluxer_types::Routes::webhook_execute(&self.id, token))
+            format!(
+                "{}?wait=true",
+                fluxer_types::Routes::webhook_execute(&self.id, token)
+            )
         } else {
             fluxer_types::Routes::webhook_execute(&self.id, token)
         };
         let form = fluxer_builders::build_multipart_form(payload, files);
         if wait {
-            let msg: fluxer_types::message::ApiMessage =
-                rest.post_multipart(&route, form).await?;
+            let msg: fluxer_types::message::ApiMessage = rest.post_multipart(&route, form).await?;
             Ok(Some(msg))
         } else {
             let _: serde_json::Value = rest.post_multipart(&route, form).await?;
@@ -127,13 +131,8 @@ impl Webhook {
         }
     }
 
-    pub async fn fetch(
-        rest: &fluxer_rest::Rest,
-        webhook_id: &str,
-    ) -> crate::Result<Webhook> {
-        let data: ApiWebhook = rest
-            .get(&fluxer_types::Routes::webhook(webhook_id))
-            .await?;
+    pub async fn fetch(rest: &fluxer_rest::Rest, webhook_id: &str) -> crate::Result<Webhook> {
+        let data: ApiWebhook = rest.get(&fluxer_types::Routes::webhook(webhook_id)).await?;
         Ok(Webhook::from_api(&data))
     }
 }

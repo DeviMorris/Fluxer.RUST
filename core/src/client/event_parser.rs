@@ -1,4 +1,3 @@
-
 use serde_json::Value;
 
 use crate::structures::channel::Channel;
@@ -45,16 +44,13 @@ pub(crate) fn parse_dispatch(event_name: &str, data: &Value) -> DispatchEvent {
         "VOICE_STATE_UPDATE" => parse_voice_state_update(data),
         "VOICE_SERVER_UPDATE" => parse_voice_server_update(data),
         "PRESENCE_UPDATE" => parse_presence_update(data),
-        "INTERACTION_CREATE" => DispatchEvent::InteractionCreate {
-            data: data.clone(),
-        },
+        "INTERACTION_CREATE" => DispatchEvent::InteractionCreate { data: data.clone() },
         _ => DispatchEvent::Raw {
             event_name: event_name.to_string(),
             data: data.clone(),
         },
     }
 }
-
 
 fn parse_message_create(data: &Value) -> DispatchEvent {
     let Some(message) = Message::from_value(data) else {
@@ -93,7 +89,6 @@ fn parse_message_delete_bulk(data: &Value) -> DispatchEvent {
     }
 }
 
-
 fn parse_reaction_add(data: &Value) -> DispatchEvent {
     match serde_json::from_value::<fluxer_types::gateway::GatewayReactionAddData>(data.clone()) {
         Ok(d) => DispatchEvent::MessageReactionAdd {
@@ -104,8 +99,7 @@ fn parse_reaction_add(data: &Value) -> DispatchEvent {
 }
 
 fn parse_reaction_remove(data: &Value) -> DispatchEvent {
-    match serde_json::from_value::<fluxer_types::gateway::GatewayReactionRemoveData>(data.clone())
-    {
+    match serde_json::from_value::<fluxer_types::gateway::GatewayReactionRemoveData>(data.clone()) {
         Ok(d) => {
             let reaction = MessageReaction {
                 message_id: d.message_id,
@@ -150,7 +144,6 @@ fn parse_reaction_remove_emoji(data: &Value) -> DispatchEvent {
     }
 }
 
-
 fn parse_guild_create(data: &Value) -> DispatchEvent {
     match serde_json::from_value::<fluxer_types::guild::ApiGuild>(data.clone()) {
         Ok(api_guild) => {
@@ -180,7 +173,6 @@ fn parse_guild_delete(data: &Value) -> DispatchEvent {
         Err(_) => raw("GUILD_DELETE", data),
     }
 }
-
 
 fn parse_guild_member_add(data: &Value) -> DispatchEvent {
     let guild_id = str_field(data, "guild_id").unwrap_or_default();
@@ -219,7 +211,6 @@ fn parse_guild_member_remove(data: &Value) -> DispatchEvent {
     }
 }
 
-
 fn parse_guild_ban_add(data: &Value) -> DispatchEvent {
     match serde_json::from_value::<fluxer_types::gateway::GatewayGuildBanAddData>(data.clone()) {
         Ok(d) => {
@@ -236,8 +227,7 @@ fn parse_guild_ban_add(data: &Value) -> DispatchEvent {
 }
 
 fn parse_guild_ban_remove(data: &Value) -> DispatchEvent {
-    match serde_json::from_value::<fluxer_types::gateway::GatewayGuildBanRemoveData>(data.clone())
-    {
+    match serde_json::from_value::<fluxer_types::gateway::GatewayGuildBanRemoveData>(data.clone()) {
         Ok(d) => DispatchEvent::GuildBanRemove {
             guild_id: d.guild_id,
             user: User::from_api(&d.user),
@@ -245,7 +235,6 @@ fn parse_guild_ban_remove(data: &Value) -> DispatchEvent {
         Err(_) => raw("GUILD_BAN_REMOVE", data),
     }
 }
-
 
 fn parse_guild_role_create(data: &Value) -> DispatchEvent {
     match serde_json::from_value::<fluxer_types::gateway::GatewayGuildRoleData>(data.clone()) {
@@ -284,7 +273,6 @@ fn parse_guild_role_delete(data: &Value) -> DispatchEvent {
     }
 }
 
-
 fn parse_guild_emojis_update(data: &Value) -> DispatchEvent {
     let guild_id = str_field(data, "guild_id").unwrap_or_default();
     let emoji_ids = data
@@ -302,7 +290,6 @@ fn parse_guild_emojis_update(data: &Value) -> DispatchEvent {
         emoji_ids,
     }
 }
-
 
 fn parse_channel_create(data: &Value) -> DispatchEvent {
     match serde_json::from_value::<fluxer_types::channel::ApiChannel>(data.clone()) {
@@ -331,7 +318,6 @@ fn parse_channel_delete(data: &Value) -> DispatchEvent {
     }
 }
 
-
 fn parse_invite_create(data: &Value) -> DispatchEvent {
     match serde_json::from_value::<fluxer_types::invite::ApiInvite>(data.clone()) {
         Ok(api_inv) => DispatchEvent::InviteCreate {
@@ -352,7 +338,6 @@ fn parse_invite_delete(data: &Value) -> DispatchEvent {
     }
 }
 
-
 fn parse_user_update(data: &Value) -> DispatchEvent {
     match serde_json::from_value::<fluxer_types::user::ApiUser>(data.clone()) {
         Ok(api_user) => DispatchEvent::UserUpdate {
@@ -361,7 +346,6 @@ fn parse_user_update(data: &Value) -> DispatchEvent {
         Err(_) => raw("USER_UPDATE", data),
     }
 }
-
 
 fn parse_typing_start(data: &Value) -> DispatchEvent {
     match serde_json::from_value::<fluxer_types::gateway::GatewayTypingStartData>(data.clone()) {
@@ -375,11 +359,9 @@ fn parse_typing_start(data: &Value) -> DispatchEvent {
     }
 }
 
-
 fn parse_voice_state_update(data: &Value) -> DispatchEvent {
-    match serde_json::from_value::<fluxer_types::gateway::GatewayVoiceStateUpdateData>(
-        data.clone(),
-    ) {
+    match serde_json::from_value::<fluxer_types::gateway::GatewayVoiceStateUpdateData>(data.clone())
+    {
         Ok(d) => DispatchEvent::VoiceStateUpdate { data: d },
         Err(_) => raw("VOICE_STATE_UPDATE", data),
     }
@@ -394,15 +376,12 @@ fn parse_voice_server_update(data: &Value) -> DispatchEvent {
     }
 }
 
-
 fn parse_presence_update(data: &Value) -> DispatchEvent {
-    match serde_json::from_value::<fluxer_types::gateway::GatewayPresenceUpdateData>(data.clone())
-    {
+    match serde_json::from_value::<fluxer_types::gateway::GatewayPresenceUpdateData>(data.clone()) {
         Ok(d) => DispatchEvent::PresenceUpdate { data: d },
         Err(_) => raw("PRESENCE_UPDATE", data),
     }
 }
-
 
 fn parse_embedded_member(data: &Value) -> Option<GuildMember> {
     let member_val = data.get("member")?;
@@ -413,15 +392,12 @@ fn parse_embedded_member(data: &Value) -> Option<GuildMember> {
     let obj = merged.as_object_mut()?;
     obj.insert("user".to_string(), author.clone());
 
-    let api_member =
-        serde_json::from_value::<fluxer_types::user::ApiGuildMember>(merged).ok()?;
+    let api_member = serde_json::from_value::<fluxer_types::user::ApiGuildMember>(merged).ok()?;
     Some(GuildMember::from_api(&api_member, guild_id))
 }
 
 fn str_field(data: &Value, field: &str) -> Option<String> {
-    data.get(field)
-        .and_then(|v| v.as_str())
-        .map(String::from)
+    data.get(field).and_then(|v| v.as_str()).map(String::from)
 }
 
 fn raw(event_name: &str, data: &Value) -> DispatchEvent {

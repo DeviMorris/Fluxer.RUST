@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::user::{ApiGuildMember, ApiUser};
 use crate::Snowflake;
+use crate::user::{ApiGuildMember, ApiUser};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]

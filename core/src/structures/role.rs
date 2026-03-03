@@ -1,6 +1,6 @@
-use fluxer_types::role::ApiRole;
 use fluxer_types::Snowflake;
-use fluxer_util::{parse_permissions, Permissions};
+use fluxer_types::role::ApiRole;
+use fluxer_util::{Permissions, parse_permissions};
 
 #[derive(Debug, Clone)]
 pub struct Role {

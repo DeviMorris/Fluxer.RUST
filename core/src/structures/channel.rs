@@ -1,5 +1,5 @@
-use fluxer_types::channel::{ApiChannel, ChannelType};
 use fluxer_types::Snowflake;
+use fluxer_types::channel::{ApiChannel, ChannelType};
 
 use super::typed_channel::TypedChannel;
 
@@ -123,10 +123,7 @@ impl Channel {
     ) -> crate::Result<fluxer_types::message::ApiMessage> {
         let form = fluxer_builders::build_multipart_form(payload, files);
         let msg: fluxer_types::message::ApiMessage = rest
-            .post_multipart(
-                &fluxer_types::Routes::channel_messages(&self.id),
-                form,
-            )
+            .post_multipart(&fluxer_types::Routes::channel_messages(&self.id), form)
             .await?;
         Ok(msg)
     }

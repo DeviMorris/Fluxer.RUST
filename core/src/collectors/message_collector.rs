@@ -30,9 +30,7 @@ pub struct MessageCollector {
 }
 
 impl MessageCollector {
-    pub fn new(
-        options: MessageCollectorOptions,
-    ) -> (mpsc::UnboundedSender<ApiMessage>, Self) {
+    pub fn new(options: MessageCollectorOptions) -> (mpsc::UnboundedSender<ApiMessage>, Self) {
         let (tx, rx) = mpsc::unbounded_channel();
         let collector = Self {
             channel_id: options.channel_id,
@@ -77,16 +75,18 @@ impl MessageCollector {
             }
 
             if let Some(filter) = &self.filter
-                && !filter(&msg) {
-                    continue;
-                }
+                && !filter(&msg)
+            {
+                continue;
+            }
 
             collected.push(msg);
 
             if let Some(max) = self.max
-                && collected.len() >= max {
-                    return (collected, EndReason::Limit);
-                }
+                && collected.len() >= max
+            {
+                return (collected, EndReason::Limit);
+            }
         }
     }
 

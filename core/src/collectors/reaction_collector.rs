@@ -93,16 +93,18 @@ impl ReactionCollector {
             }
 
             if let Some(filter) = &self.filter
-                && !filter(&reaction) {
-                    continue;
-                }
+                && !filter(&reaction)
+            {
+                continue;
+            }
 
             collected.push(reaction);
 
             if let Some(max) = self.max
-                && collected.len() >= max {
-                    return (collected, EndReason::Limit);
-                }
+                && collected.len() >= max
+            {
+                return (collected, EndReason::Limit);
+            }
         }
     }
 }

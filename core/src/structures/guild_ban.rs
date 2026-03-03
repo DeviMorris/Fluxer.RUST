@@ -1,5 +1,5 @@
-use fluxer_types::ban::ApiBan;
 use fluxer_types::Snowflake;
+use fluxer_types::ban::ApiBan;
 
 use crate::structures::user::User;
 
@@ -22,8 +22,11 @@ impl GuildBan {
     }
 
     pub async fn unban(&self, rest: &fluxer_rest::Rest) -> crate::Result<()> {
-        rest.delete_route(&fluxer_types::Routes::guild_ban(&self.guild_id, &self.user.id))
-            .await?;
+        rest.delete_route(&fluxer_types::Routes::guild_ban(
+            &self.guild_id,
+            &self.user.id,
+        ))
+        .await?;
         Ok(())
     }
 }

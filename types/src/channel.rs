@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::user::ApiUser;
 use crate::Snowflake;
+use crate::user::ApiUser;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize_repr, Deserialize_repr)]
 #[repr(u16)]

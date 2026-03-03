@@ -20,10 +20,7 @@ impl<'a> ChannelManager<'a> {
     }
 
     pub async fn fetch(&self, id: &str) -> crate::Result<Channel> {
-        let data: ApiChannel = self
-            .rest
-            .get(&fluxer_types::Routes::channel(id))
-            .await?;
+        let data: ApiChannel = self.rest.get(&fluxer_types::Routes::channel(id)).await?;
         let channel = Channel::from_api(&data);
         self.cache.insert(channel.id.clone(), channel.clone());
         Ok(channel)
@@ -58,7 +55,9 @@ impl<'a> ChannelManager<'a> {
     ) -> crate::Result<ApiMessage> {
         let msg: ApiMessage = self
             .rest
-            .get(&fluxer_types::Routes::channel_message(channel_id, message_id))
+            .get(&fluxer_types::Routes::channel_message(
+                channel_id, message_id,
+            ))
             .await?;
         Ok(msg)
     }

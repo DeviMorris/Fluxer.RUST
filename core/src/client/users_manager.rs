@@ -19,10 +19,7 @@ impl<'a> UsersManager<'a> {
     }
 
     pub async fn fetch(&self, id: &str) -> crate::Result<User> {
-        let data: ApiUser = self
-            .rest
-            .get(&fluxer_types::Routes::user(id))
-            .await?;
+        let data: ApiUser = self.rest.get(&fluxer_types::Routes::user(id)).await?;
         let user = User::from_api(&data);
         self.cache.insert(user.id.clone(), user.clone());
         Ok(user)
@@ -35,7 +32,10 @@ impl<'a> UsersManager<'a> {
         self.fetch(id).await
     }
 
-    pub async fn fetch_with_profile(&self, id: &str) -> crate::Result<fluxer_types::user::ApiProfileResponse> {
+    pub async fn fetch_with_profile(
+        &self,
+        id: &str,
+    ) -> crate::Result<fluxer_types::user::ApiProfileResponse> {
         let data: fluxer_types::user::ApiProfileResponse = self
             .rest
             .get(&fluxer_types::Routes::user_profile(id, None))

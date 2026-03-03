@@ -1,5 +1,5 @@
-use fluxer_types::sticker::ApiSticker;
 use fluxer_types::Snowflake;
+use fluxer_types::sticker::ApiSticker;
 
 use crate::util::cdn;
 
@@ -30,8 +30,11 @@ impl GuildSticker {
     }
 
     pub async fn delete(&self, rest: &fluxer_rest::Rest) -> crate::Result<()> {
-        rest.delete_route(&fluxer_types::Routes::guild_sticker(&self.guild_id, &self.id))
-            .await?;
+        rest.delete_route(&fluxer_types::Routes::guild_sticker(
+            &self.guild_id,
+            &self.id,
+        ))
+        .await?;
         Ok(())
     }
 

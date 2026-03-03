@@ -69,7 +69,12 @@ impl EmbedBuilder {
         self
     }
 
-    pub fn author(mut self, name: impl Into<String>, url: Option<String>, icon_url: Option<String>) -> Self {
+    pub fn author(
+        mut self,
+        name: impl Into<String>,
+        url: Option<String>,
+        icon_url: Option<String>,
+    ) -> Self {
         let n = name.into();
         self.author = Some(ApiEmbedAuthor {
             name: Some(truncate_str(&n, MAX_AUTHOR_NAME)),
@@ -110,7 +115,12 @@ impl EmbedBuilder {
         self
     }
 
-    pub fn field(mut self, name: impl Into<String>, value: impl Into<String>, inline: bool) -> Self {
+    pub fn field(
+        mut self,
+        name: impl Into<String>,
+        value: impl Into<String>,
+        inline: bool,
+    ) -> Self {
         if self.fields.len() < MAX_FIELDS {
             let n = name.into();
             let v = value.into();
@@ -126,11 +136,22 @@ impl EmbedBuilder {
     pub fn build(self) -> ApiEmbed {
         let total = char_count(&self.title)
             + char_count(&self.description)
-            + self.fields.iter().map(|f| f.name.len() + f.value.len()).sum::<usize>()
+            + self
+                .fields
+                .iter()
+                .map(|f| f.name.len() + f.value.len())
+                .sum::<usize>()
             + self.footer.as_ref().map(|f| f.text.len()).unwrap_or(0)
-            + self.author.as_ref().and_then(|a| a.name.as_ref().map(|n| n.len())).unwrap_or(0);
+            + self
+                .author
+                .as_ref()
+                .and_then(|a| a.name.as_ref().map(|n| n.len()))
+                .unwrap_or(0);
 
-        assert!(total <= MAX_TOTAL, "embed total length must be <= {MAX_TOTAL}");
+        assert!(
+            total <= MAX_TOTAL,
+            "embed total length must be <= {MAX_TOTAL}"
+        );
 
         ApiEmbed {
             kind: Some("rich".to_string()),
@@ -145,7 +166,11 @@ impl EmbedBuilder {
             thumbnail: self.thumbnail,
             video: self.video,
             audio: self.audio,
-            fields: if self.fields.is_empty() { None } else { Some(self.fields) },
+            fields: if self.fields.is_empty() {
+                None
+            } else {
+                Some(self.fields)
+            },
             provider: None,
             nsfw: None,
             children: None,

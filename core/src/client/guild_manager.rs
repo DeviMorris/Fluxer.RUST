@@ -19,10 +19,7 @@ impl<'a> GuildManager<'a> {
     }
 
     pub async fn fetch(&self, id: &str) -> crate::Result<Guild> {
-        let data: ApiGuild = self
-            .rest
-            .get(&fluxer_types::Routes::guild(id))
-            .await?;
+        let data: ApiGuild = self.rest.get(&fluxer_types::Routes::guild(id)).await?;
         let guild = Guild::from_api(&data);
         self.cache.insert(guild.id.clone(), guild.clone());
         Ok(guild)

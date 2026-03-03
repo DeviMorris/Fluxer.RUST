@@ -1,8 +1,8 @@
 use fluxer_types::{ApiEmbed, ApiMessageReference};
 use serde::{Deserialize, Serialize};
 
-use crate::embed::EmbedBuilder;
 use crate::attachment::AttachmentPayload;
+use crate::embed::EmbedBuilder;
 use crate::file::FileAttachment;
 
 const CONTENT_MAX: usize = 2000;
@@ -37,7 +37,10 @@ impl MessagePayload {
 
     pub fn content(mut self, content: impl Into<String>) -> Self {
         let c = content.into();
-        assert!(c.len() <= CONTENT_MAX, "content must be <= {CONTENT_MAX} characters");
+        assert!(
+            c.len() <= CONTENT_MAX,
+            "content must be <= {CONTENT_MAX} characters"
+        );
         self.data.content = Some(c);
         self
     }
@@ -64,7 +67,12 @@ impl MessagePayload {
         self
     }
 
-    pub fn reply(mut self, channel_id: impl Into<String>, message_id: impl Into<String>, guild_id: Option<String>) -> Self {
+    pub fn reply(
+        mut self,
+        channel_id: impl Into<String>,
+        message_id: impl Into<String>,
+        guild_id: Option<String>,
+    ) -> Self {
         self.data.message_reference = Some(ApiMessageReference {
             channel_id: channel_id.into(),
             message_id: message_id.into(),

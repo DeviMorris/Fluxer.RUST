@@ -1,4 +1,3 @@
-
 use crate::structures::channel::Channel;
 use crate::structures::guild::Guild;
 use crate::structures::guild_ban::GuildBan;

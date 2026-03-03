@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use dashmap::DashMap;
 use serde_json::Value;
-use tokio::sync::{mpsc, RwLock};
+use tokio::sync::{RwLock, mpsc};
 use tracing::warn;
 
 use fluxer_rest::{Rest, RestOptions};
@@ -26,13 +26,10 @@ use crate::structures::user::User;
 use super::event_parser;
 use super::typed_events::DispatchEvent;
 
-type EventCallback = Box<
-    dyn Fn(Value) -> Pin<Box<dyn Future<Output = ()> + Send>> + Send + Sync,
->;
+type EventCallback = Box<dyn Fn(Value) -> Pin<Box<dyn Future<Output = ()> + Send>> + Send + Sync>;
 
-type TypedEventCallback = Box<
-    dyn Fn(DispatchEvent) -> Pin<Box<dyn Future<Output = ()> + Send>> + Send + Sync,
->;
+type TypedEventCallback =
+    Box<dyn Fn(DispatchEvent) -> Pin<Box<dyn Future<Output = ()> + Send>> + Send + Sync>;
 
 #[derive(Debug, Clone, Default)]
 pub struct CacheSizeLimits {
@@ -188,7 +185,11 @@ impl Client {
             presence: self.options.presence.clone(),
             shard_ids: None,
             shard_count: None,
-            version: self.options.gateway_version.clone().unwrap_or("1".to_string()),
+            version: self
+                .options
+                .gateway_version
+                .clone()
+                .unwrap_or("1".to_string()),
         };
 
         let mut manager = WebSocketManager::new(ws_options, self.rest.clone(), ws_tx);
@@ -200,13 +201,13 @@ impl Client {
             match event {
                 WsEvent::ShardReady { data, .. } => {
                     if let Some(user_data) = data.get("user")
-                        && let Ok(api_user) = serde_json::from_value::<fluxer_types::user::ApiUser>(
-                            user_data.clone(),
-                        ) {
-                            let u = User::from_api(&api_user);
-                            self.user = Some(ClientUser::from_user(u.clone()));
-                            self.users.insert(api_user.id.clone(), u);
-                        }
+                        && let Ok(api_user) =
+                            serde_json::from_value::<fluxer_types::user::ApiUser>(user_data.clone())
+                    {
+                        let u = User::from_api(&api_user);
+                        self.user = Some(ClientUser::from_user(u.clone()));
+                        self.users.insert(api_user.id.clone(), u);
+                    }
 
                     if let Some(guilds_arr) = data.get("guilds").and_then(|v| v.as_array()) {
                         for guild_val in guilds_arr {
@@ -226,27 +227,30 @@ impl Client {
 
                 WsEvent::Dispatch { payload, .. } => {
                     if payload.op == GatewayOpcode::Dispatch
-                        && let Some(event_name) = &payload.t {
-                            let data = payload.d.clone().unwrap_or(Value::Null);
-                            self.handle_dispatch(event_name, &data).await;
-                            self.enforce_cache_limits();
-                            self.emit_event(event_name, data.clone()).await;
+                        && let Some(event_name) = &payload.t
+                    {
+                        let data = payload.d.clone().unwrap_or(Value::Null);
+                        self.handle_dispatch(event_name, &data).await;
+                        self.enforce_cache_limits();
+                        self.emit_event(event_name, data.clone()).await;
 
-                            let typed = event_parser::parse_dispatch(event_name, &data);
-                            self.emit_typed_event(typed).await;
-                        }
+                        let typed = event_parser::parse_dispatch(event_name, &data);
+                        self.emit_typed_event(typed).await;
+                    }
                 }
 
                 WsEvent::Error { error, shard_id: _ } => {
                     tracing::error!(target: "fluxer_core::ws", "{error}");
                     self.emit_event("ERROR", Value::String(error.clone())).await;
-                    self.emit_typed_event(DispatchEvent::Error { message: error }).await;
+                    self.emit_typed_event(DispatchEvent::Error { message: error })
+                        .await;
                 }
 
                 WsEvent::Debug(msg) => {
                     tracing::debug!(target: "fluxer_core::ws", "{msg}");
                     self.emit_event("DEBUG", Value::String(msg.clone())).await;
-                    self.emit_typed_event(DispatchEvent::Debug { message: msg }).await;
+                    self.emit_typed_event(DispatchEvent::Debug { message: msg })
+                        .await;
                 }
 
                 _ => {}
@@ -267,18 +271,27 @@ impl Client {
                 }
 
                 if let Some(author) = data.get("author")
-                    && let Ok(api_user) = serde_json::from_value::<fluxer_types::user::ApiUser>(author.clone()) {
-                        self.get_or_create_user(&api_user);
-                    }
+                    && let Ok(api_user) =
+                        serde_json::from_value::<fluxer_types::user::ApiUser>(author.clone())
+                {
+                    self.get_or_create_user(&api_user);
+                }
                 if let Some(member_val) = data.get("member") {
                     let guild_id = data.get("guild_id").and_then(|v| v.as_str()).unwrap_or("");
-                    let author_id = data.get("author").and_then(|a| a.get("id")).and_then(|v| v.as_str()).unwrap_or("");
+                    let author_id = data
+                        .get("author")
+                        .and_then(|a| a.get("id"))
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("");
                     if !guild_id.is_empty() && !author_id.is_empty() {
                         let mut merged = member_val.clone();
-                        if let (Some(obj), Some(au)) = (merged.as_object_mut(), data.get("author")) {
+                        if let (Some(obj), Some(au)) = (merged.as_object_mut(), data.get("author"))
+                        {
                             obj.insert("user".to_string(), au.clone());
                         }
-                        if let Ok(api_member) = serde_json::from_value::<fluxer_types::user::ApiGuildMember>(merged) {
+                        if let Ok(api_member) =
+                            serde_json::from_value::<fluxer_types::user::ApiGuildMember>(merged)
+                        {
                             let member = GuildMember::from_api(&api_member, guild_id);
                             self.members
                                 .entry(guild_id.to_string())
@@ -291,18 +304,25 @@ impl Client {
 
             "MESSAGE_UPDATE" => {
                 if let Some(author) = data.get("author")
-                    && let Ok(api_user) = serde_json::from_value::<fluxer_types::user::ApiUser>(author.clone()) {
-                        self.get_or_create_user(&api_user);
-                    }
+                    && let Ok(api_user) =
+                        serde_json::from_value::<fluxer_types::user::ApiUser>(author.clone())
+                {
+                    self.get_or_create_user(&api_user);
+                }
             }
 
             "GUILD_CREATE" => {
-                if let Ok(api_guild) = serde_json::from_value::<fluxer_types::guild::ApiGuild>(data.clone()) {
+                if let Ok(api_guild) =
+                    serde_json::from_value::<fluxer_types::guild::ApiGuild>(data.clone())
+                {
                     let mut guild = Guild::from_api(&api_guild);
 
                     if let Some(channels_arr) = data.get("channels").and_then(|v| v.as_array()) {
                         for ch_val in channels_arr {
-                            if let Ok(api_ch) = serde_json::from_value::<fluxer_types::channel::ApiChannel>(ch_val.clone()) {
+                            if let Ok(api_ch) = serde_json::from_value::<
+                                fluxer_types::channel::ApiChannel,
+                            >(ch_val.clone())
+                            {
                                 guild.channels.push(api_ch.id.clone());
                                 let ch = Channel::from_api(&api_ch);
                                 self.channels.insert(ch.id.clone(), ch);
@@ -312,21 +332,28 @@ impl Client {
 
                     if let Some(roles_arr) = data.get("roles").and_then(|v| v.as_array()) {
                         for role_val in roles_arr {
-                            if let Ok(api_role) = serde_json::from_value::<fluxer_types::role::ApiRole>(role_val.clone()) {
-                                let role = crate::structures::role::Role::from_api(&api_role, &guild.id);
+                            if let Ok(api_role) = serde_json::from_value::<
+                                fluxer_types::role::ApiRole,
+                            >(role_val.clone())
+                            {
+                                let role =
+                                    crate::structures::role::Role::from_api(&api_role, &guild.id);
                                 guild.roles.insert(role.id.clone(), role);
                             }
                         }
                     }
 
                     if let Some(members_arr) = data.get("members").and_then(|v| v.as_array()) {
-                        let guild_members = self.members
-                            .entry(guild.id.clone())
-                            .or_default();
+                        let guild_members = self.members.entry(guild.id.clone()).or_default();
                         for m_val in members_arr {
-                            if let Ok(api_m) = serde_json::from_value::<fluxer_types::user::ApiGuildMember>(m_val.clone()) {
+                            if let Ok(api_m) = serde_json::from_value::<
+                                fluxer_types::user::ApiGuildMember,
+                            >(m_val.clone())
+                            {
                                 let member = GuildMember::from_api(&api_m, &guild.id);
-                                self.users.entry(member.id.clone()).or_insert_with(|| member.user.clone());
+                                self.users
+                                    .entry(member.id.clone())
+                                    .or_insert_with(|| member.user.clone());
                                 guild_members.insert(member.id.clone(), member);
                             }
                         }
@@ -352,11 +379,14 @@ impl Client {
             }
 
             "GUILD_UPDATE" => {
-                if let Ok(api_guild) = serde_json::from_value::<fluxer_types::guild::ApiGuild>(data.clone()) {
+                if let Ok(api_guild) =
+                    serde_json::from_value::<fluxer_types::guild::ApiGuild>(data.clone())
+                {
                     if let Some(mut g) = self.guilds.get_mut(&api_guild.id) {
                         g.patch(&api_guild);
                     } else {
-                        self.guilds.insert(api_guild.id.clone(), Guild::from_api(&api_guild));
+                        self.guilds
+                            .insert(api_guild.id.clone(), Guild::from_api(&api_guild));
                     }
                 }
             }
@@ -374,7 +404,9 @@ impl Client {
 
             "GUILD_MEMBER_ADD" => {
                 let guild_id = data.get("guild_id").and_then(|v| v.as_str()).unwrap_or("");
-                if let Ok(api_m) = serde_json::from_value::<fluxer_types::user::ApiGuildMember>(data.clone()) {
+                if let Ok(api_m) =
+                    serde_json::from_value::<fluxer_types::user::ApiGuildMember>(data.clone())
+                {
                     let member = GuildMember::from_api(&api_m, guild_id);
                     if let Some(ref u) = api_m.user {
                         self.get_or_create_user(u);
@@ -391,24 +423,37 @@ impl Client {
 
             "GUILD_MEMBER_UPDATE" => {
                 let guild_id = data.get("guild_id").and_then(|v| v.as_str()).unwrap_or("");
-                let user_id = data.get("user").and_then(|u| u.get("id")).and_then(|v| v.as_str()).unwrap_or("");
-                if !guild_id.is_empty() && !user_id.is_empty()
+                let user_id = data
+                    .get("user")
+                    .and_then(|u| u.get("id"))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                if !guild_id.is_empty()
+                    && !user_id.is_empty()
                     && let Some(guild_members) = self.members.get(guild_id)
-                        && let Some(mut m) = guild_members.get_mut(user_id) {
-                            if let Some(nick) = data.get("nick").and_then(|v| v.as_str()) {
-                                m.nick = Some(nick.to_string());
-                            } else if data.get("nick").map(|v| v.is_null()).unwrap_or(false) {
-                                m.nick = None;
-                            }
-                            if let Some(roles) = data.get("roles").and_then(|v| v.as_array()) {
-                                m.role_ids = roles.iter().filter_map(|r| r.as_str().map(String::from)).collect();
-                            }
-                        }
+                    && let Some(mut m) = guild_members.get_mut(user_id)
+                {
+                    if let Some(nick) = data.get("nick").and_then(|v| v.as_str()) {
+                        m.nick = Some(nick.to_string());
+                    } else if data.get("nick").map(|v| v.is_null()).unwrap_or(false) {
+                        m.nick = None;
+                    }
+                    if let Some(roles) = data.get("roles").and_then(|v| v.as_array()) {
+                        m.role_ids = roles
+                            .iter()
+                            .filter_map(|r| r.as_str().map(String::from))
+                            .collect();
+                    }
+                }
             }
 
             "GUILD_MEMBER_REMOVE" => {
                 let guild_id = data.get("guild_id").and_then(|v| v.as_str()).unwrap_or("");
-                let user_id = data.get("user").and_then(|u| u.get("id")).and_then(|v| v.as_str()).unwrap_or("");
+                let user_id = data
+                    .get("user")
+                    .and_then(|u| u.get("id"))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
                 if !guild_id.is_empty() && !user_id.is_empty() {
                     if let Some(guild_members) = self.members.get(guild_id) {
                         guild_members.remove(user_id);
@@ -422,19 +467,22 @@ impl Client {
             "GUILD_ROLE_CREATE" | "GUILD_ROLE_UPDATE" => {
                 let guild_id = data.get("guild_id").and_then(|v| v.as_str()).unwrap_or("");
                 if let Some(role_val) = data.get("role")
-                    && let Ok(api_role) = serde_json::from_value::<fluxer_types::role::ApiRole>(role_val.clone())
-                        && let Some(mut g) = self.guilds.get_mut(guild_id) {
-                            let role = crate::structures::role::Role::from_api(&api_role, guild_id);
-                            g.roles.insert(role.id.clone(), role);
-                        }
+                    && let Ok(api_role) =
+                        serde_json::from_value::<fluxer_types::role::ApiRole>(role_val.clone())
+                    && let Some(mut g) = self.guilds.get_mut(guild_id)
+                {
+                    let role = crate::structures::role::Role::from_api(&api_role, guild_id);
+                    g.roles.insert(role.id.clone(), role);
+                }
             }
 
             "GUILD_ROLE_DELETE" => {
                 let guild_id = data.get("guild_id").and_then(|v| v.as_str()).unwrap_or("");
                 if let Some(role_id) = data.get("role_id").and_then(|v| v.as_str())
-                    && let Some(mut g) = self.guilds.get_mut(guild_id) {
-                        g.roles.remove(role_id);
-                    }
+                    && let Some(mut g) = self.guilds.get_mut(guild_id)
+                {
+                    g.roles.remove(role_id);
+                }
             }
 
             "GUILD_EMOJIS_UPDATE" => {
@@ -453,19 +501,24 @@ impl Client {
 
             "GUILD_BAN_ADD" | "GUILD_BAN_REMOVE" => {
                 if let Some(user_val) = data.get("user")
-                    && let Ok(api_user) = serde_json::from_value::<fluxer_types::user::ApiUser>(user_val.clone()) {
-                        self.get_or_create_user(&api_user);
-                    }
+                    && let Ok(api_user) =
+                        serde_json::from_value::<fluxer_types::user::ApiUser>(user_val.clone())
+                {
+                    self.get_or_create_user(&api_user);
+                }
             }
 
             "CHANNEL_CREATE" | "CHANNEL_UPDATE" => {
-                if let Ok(api_ch) = serde_json::from_value::<fluxer_types::channel::ApiChannel>(data.clone()) {
+                if let Ok(api_ch) =
+                    serde_json::from_value::<fluxer_types::channel::ApiChannel>(data.clone())
+                {
                     let ch = Channel::from_api(&api_ch);
                     if let Some(gid) = &ch.guild_id
                         && let Some(mut g) = self.guilds.get_mut(gid)
-                            && !g.channels.contains(&ch.id) {
-                                g.channels.push(ch.id.clone());
-                            }
+                        && !g.channels.contains(&ch.id)
+                    {
+                        g.channels.push(ch.id.clone());
+                    }
                     self.channels.insert(ch.id.clone(), ch);
                 }
             }
@@ -473,30 +526,48 @@ impl Client {
             "CHANNEL_DELETE" => {
                 if let Some(id) = data.get("id").and_then(|v| v.as_str())
                     && let Some((_, ch)) = self.channels.remove(id)
-                        && let Some(gid) = &ch.guild_id
-                            && let Some(mut g) = self.guilds.get_mut(gid) {
-                                g.channels.retain(|c| c != id);
-                            }
+                    && let Some(gid) = &ch.guild_id
+                    && let Some(mut g) = self.guilds.get_mut(gid)
+                {
+                    g.channels.retain(|c| c != id);
+                }
             }
 
             "USER_UPDATE" => {
-                if let Ok(api_user) = serde_json::from_value::<fluxer_types::user::ApiUser>(data.clone())
+                if let Ok(api_user) =
+                    serde_json::from_value::<fluxer_types::user::ApiUser>(data.clone())
                     && let Some(ref cu) = self.user
-                        && cu.id() == api_user.id {
-                            let u = User::from_api(&api_user);
-                            self.user = Some(ClientUser::from_user(u.clone()));
-                            self.users.insert(api_user.id.clone(), u);
-                        }
+                    && cu.id() == api_user.id
+                {
+                    let u = User::from_api(&api_user);
+                    self.user = Some(ClientUser::from_user(u.clone()));
+                    self.users.insert(api_user.id.clone(), u);
+                }
             }
 
             "MESSAGE_REACTION_ADD" => {
                 self.reaction_collector_senders.retain(|tx| !tx.is_closed());
                 if !self.reaction_collector_senders.is_empty() {
                     let reaction = CollectedReaction {
-                        message_id: data.get("message_id").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                        channel_id: data.get("channel_id").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                        guild_id: data.get("guild_id").and_then(|v| v.as_str()).map(String::from),
-                        user_id: data.get("user_id").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                        message_id: data
+                            .get("message_id")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string(),
+                        channel_id: data
+                            .get("channel_id")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string(),
+                        guild_id: data
+                            .get("guild_id")
+                            .and_then(|v| v.as_str())
+                            .map(String::from),
+                        user_id: data
+                            .get("user_id")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string(),
                         emoji_name: data
                             .get("emoji")
                             .and_then(|e| e.get("name"))

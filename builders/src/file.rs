@@ -1,4 +1,3 @@
-
 use reqwest::multipart::{Form, Part};
 
 use crate::attachment::AttachmentPayload;
@@ -51,10 +50,7 @@ impl FileAttachment {
     }
 }
 
-pub fn build_multipart_form(
-    payload: &MessagePayloadData,
-    files: &[FileAttachment],
-) -> Form {
+pub fn build_multipart_form(payload: &MessagePayloadData, files: &[FileAttachment]) -> Form {
     let attachment_meta: Vec<AttachmentPayload> = files
         .iter()
         .enumerate()
@@ -66,7 +62,12 @@ pub fn build_multipart_form(
         .collect();
 
     let mut payload_clone = payload.clone();
-    if payload_clone.attachments.is_none() || payload_clone.attachments.as_ref().is_some_and(|a| a.is_empty()) {
+    if payload_clone.attachments.is_none()
+        || payload_clone
+            .attachments
+            .as_ref()
+            .is_some_and(|a| a.is_empty())
+    {
         payload_clone.attachments = Some(attachment_meta);
     }
 

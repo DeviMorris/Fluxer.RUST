@@ -1,14 +1,13 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+use crate::Snowflake;
 use crate::channel::ApiChannel;
 use crate::emoji::ApiEmoji;
 use crate::guild::ApiGuild;
 use crate::role::ApiRole;
 use crate::sticker::ApiSticker;
 use crate::user::{ApiGuildMember, ApiUser};
-use crate::Snowflake;
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize_repr, Deserialize_repr)]
 #[repr(u8)]
@@ -25,7 +24,6 @@ pub enum GatewayOpcode {
     Hello = 10,
     HeartbeatAck = 11,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GatewayIdentifyProperties {
@@ -111,7 +109,6 @@ pub struct GatewayRequestGuildMembersData {
     pub query: Option<String>,
     pub limit: u32,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GatewayHelloData {

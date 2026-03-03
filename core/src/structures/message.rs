@@ -1,9 +1,9 @@
+use fluxer_types::Snowflake;
 use fluxer_types::embed::ApiEmbed;
 use fluxer_types::message::{
     ApiMessage, ApiMessageAttachment, ApiMessageReaction, ApiMessageReference, ApiMessageSticker,
     MessageType,
 };
-use fluxer_types::Snowflake;
 use serde_json::Value;
 
 use crate::structures::user::User;
@@ -134,11 +134,7 @@ impl Message {
     ) -> crate::Result<ApiMessage> {
         let payload = fluxer_builders::MessagePayload::new()
             .content(content)
-            .reply(
-                &self.channel_id,
-                &self.id,
-                self.guild_id.clone(),
-            )
+            .reply(&self.channel_id, &self.id, self.guild_id.clone())
             .build();
         let msg: ApiMessage = rest
             .post(
@@ -226,11 +222,7 @@ impl Message {
         Ok(msg)
     }
 
-    pub async fn add_reaction(
-        &self,
-        rest: &fluxer_rest::Rest,
-        emoji: &str,
-    ) -> crate::Result<()> {
+    pub async fn add_reaction(&self, rest: &fluxer_rest::Rest, emoji: &str) -> crate::Result<()> {
         let route = format!(
             "{}/@me",
             fluxer_types::Routes::channel_message_reaction(&self.channel_id, &self.id, emoji)
@@ -297,11 +289,8 @@ impl Message {
         limit: Option<u32>,
         after: Option<&str>,
     ) -> crate::Result<Vec<fluxer_types::user::ApiUser>> {
-        let mut route = fluxer_types::Routes::channel_message_reaction(
-            &self.channel_id,
-            &self.id,
-            emoji,
-        );
+        let mut route =
+            fluxer_types::Routes::channel_message_reaction(&self.channel_id, &self.id, emoji);
         let mut params = Vec::new();
         if let Some(l) = limit {
             params.push(format!("limit={l}"));
@@ -368,8 +357,14 @@ impl PartialMessage {
         Some(Self {
             id: data.get("id")?.as_str()?.to_string(),
             channel_id: data.get("channel_id")?.as_str()?.to_string(),
-            guild_id: data.get("guild_id").and_then(|v| v.as_str()).map(String::from),
-            content: data.get("content").and_then(|v| v.as_str()).map(String::from),
+            guild_id: data
+                .get("guild_id")
+                .and_then(|v| v.as_str())
+                .map(String::from),
+            content: data
+                .get("content")
+                .and_then(|v| v.as_str())
+                .map(String::from),
             author_id: data
                 .get("author")
                 .and_then(|a| a.get("id"))

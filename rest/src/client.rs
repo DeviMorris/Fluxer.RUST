@@ -1,9 +1,9 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE, USER_AGENT};
-use serde::de::DeserializeOwned;
+use reqwest::header::{AUTHORIZATION, CONTENT_TYPE, HeaderMap, HeaderValue, USER_AGENT};
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 
 use crate::error::{FieldError, FluxerApiError, HttpError, RateLimitError, RestError};
 use crate::rate_limit::RateLimitManager;
@@ -135,23 +135,24 @@ impl Rest {
             let text = res.text().await.unwrap_or_default();
 
             if status == 429
-                && let Ok(rl) = serde_json::from_str::<fluxer_types::RateLimitErrorBody>(&text) {
-                    let global = rl.global.unwrap_or(false);
-                    if global {
-                        self.rate_limiter.set_global(rl.retry_after);
-                    }
-                    attempt += 1;
-                    if attempt < self.options.max_retries {
-                        tokio::time::sleep(Duration::from_secs_f64(rl.retry_after)).await;
-                        continue;
-                    }
-                    return Err(RateLimitError {
-                        retry_after: rl.retry_after,
-                        global,
-                        message: rl.message,
-                    }
-                    .into());
+                && let Ok(rl) = serde_json::from_str::<fluxer_types::RateLimitErrorBody>(&text)
+            {
+                let global = rl.global.unwrap_or(false);
+                if global {
+                    self.rate_limiter.set_global(rl.retry_after);
                 }
+                attempt += 1;
+                if attempt < self.options.max_retries {
+                    tokio::time::sleep(Duration::from_secs_f64(rl.retry_after)).await;
+                    continue;
+                }
+                return Err(RateLimitError {
+                    retry_after: rl.retry_after,
+                    global,
+                    message: rl.message,
+                }
+                .into());
+            }
 
             if status >= 400 {
                 return Err(self.parse_error(status, &text));
@@ -178,14 +179,15 @@ impl Rest {
         let text = res.text().await.unwrap_or_default();
 
         if status == 429
-            && let Ok(rl) = serde_json::from_str::<fluxer_types::RateLimitErrorBody>(&text) {
-                return Err(RateLimitError {
-                    retry_after: rl.retry_after,
-                    global: rl.global.unwrap_or(false),
-                    message: rl.message,
-                }
-                .into());
+            && let Ok(rl) = serde_json::from_str::<fluxer_types::RateLimitErrorBody>(&text)
+        {
+            return Err(RateLimitError {
+                retry_after: rl.retry_after,
+                global: rl.global.unwrap_or(false),
+                message: rl.message,
             }
+            .into());
+        }
 
         if status >= 400 {
             return Err(self.parse_error(status, &text));
@@ -274,9 +276,10 @@ impl Rest {
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
         let token = self.token.read().await;
         if let Some(ref t) = *token
-            && let Ok(val) = HeaderValue::from_str(t) {
-                headers.insert(AUTHORIZATION, val);
-            }
+            && let Ok(val) = HeaderValue::from_str(t)
+        {
+            headers.insert(AUTHORIZATION, val);
+        }
         headers
     }
 

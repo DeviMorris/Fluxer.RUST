@@ -1,5 +1,5 @@
-use fluxer_types::user::ApiUser;
 use fluxer_types::Snowflake;
+use fluxer_types::user::ApiUser;
 
 use crate::util::cdn::{self, CdnOptions};
 
@@ -89,9 +89,9 @@ impl User {
         rest: &fluxer_rest::Rest,
     ) -> crate::Result<fluxer_types::channel::ApiChannel> {
         let body = serde_json::json!({ "recipient_id": self.id });
-        let ch: fluxer_types::channel::ApiChannel =
-            rest.post(fluxer_types::Routes::user_me_channels(), Some(&body))
-                .await?;
+        let ch: fluxer_types::channel::ApiChannel = rest
+            .post(fluxer_types::Routes::user_me_channels(), Some(&body))
+            .await?;
         Ok(ch)
     }
 }

@@ -25,7 +25,6 @@ impl<'a> From<&'a Channel> for TypedChannel<'a> {
     }
 }
 
-
 #[derive(Debug)]
 pub struct TextChannel<'a>(pub &'a Channel);
 
@@ -116,7 +115,6 @@ impl std::ops::Deref for TextChannel<'_> {
     }
 }
 
-
 #[derive(Debug)]
 pub struct VoiceChannel<'a>(pub &'a Channel);
 
@@ -149,7 +147,6 @@ impl std::ops::Deref for VoiceChannel<'_> {
     }
 }
 
-
 #[derive(Debug)]
 pub struct CategoryChannel<'a>(pub &'a Channel);
 
@@ -169,7 +166,6 @@ impl std::ops::Deref for CategoryChannel<'_> {
         self.0
     }
 }
-
 
 #[derive(Debug)]
 pub struct DmChannel<'a>(pub &'a Channel);

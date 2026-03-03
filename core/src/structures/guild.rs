@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
+use fluxer_types::Snowflake;
 use fluxer_types::channel::ApiChannelOverwrite;
 use fluxer_types::guild::ApiGuild;
-use fluxer_types::Snowflake;
 use serde_json::Value;
 
 use crate::structures::role::Role;
@@ -125,11 +125,7 @@ impl Guild {
         cdn::cdn_guild_splash_url(&self.id, self.splash.as_deref(), opts)
     }
 
-    pub async fn edit(
-        &self,
-        rest: &fluxer_rest::Rest,
-        body: &Value,
-    ) -> crate::Result<ApiGuild> {
+    pub async fn edit(&self, rest: &fluxer_rest::Rest, body: &Value) -> crate::Result<ApiGuild> {
         let guild: ApiGuild = rest
             .patch(&fluxer_types::Routes::guild(&self.id), Some(body))
             .await?;
@@ -207,16 +203,11 @@ impl Guild {
         Ok(guild)
     }
 
-    pub async fn fetch_roles(
-        &mut self,
-        rest: &fluxer_rest::Rest,
-    ) -> crate::Result<Vec<Role>> {
-        let data: Vec<fluxer_types::role::ApiRole> =
-            rest.get(&fluxer_types::Routes::guild_roles(&self.id)).await?;
-        let roles: Vec<Role> = data
-            .iter()
-            .map(|r| Role::from_api(r, &self.id))
-            .collect();
+    pub async fn fetch_roles(&mut self, rest: &fluxer_rest::Rest) -> crate::Result<Vec<Role>> {
+        let data: Vec<fluxer_types::role::ApiRole> = rest
+            .get(&fluxer_types::Routes::guild_roles(&self.id))
+            .await?;
+        let roles: Vec<Role> = data.iter().map(|r| Role::from_api(r, &self.id)).collect();
         for role in &roles {
             self.roles.insert(role.id.clone(), role.clone());
         }
@@ -278,21 +269,13 @@ impl Guild {
         Ok(())
     }
 
-    pub async fn unban(
-        &self,
-        rest: &fluxer_rest::Rest,
-        user_id: &str,
-    ) -> crate::Result<()> {
+    pub async fn unban(&self, rest: &fluxer_rest::Rest, user_id: &str) -> crate::Result<()> {
         rest.delete_route(&fluxer_types::Routes::guild_ban(&self.id, user_id))
             .await?;
         Ok(())
     }
 
-    pub async fn kick(
-        &self,
-        rest: &fluxer_rest::Rest,
-        user_id: &str,
-    ) -> crate::Result<()> {
+    pub async fn kick(&self, rest: &fluxer_rest::Rest, user_id: &str) -> crate::Result<()> {
         rest.delete_route(&fluxer_types::Routes::guild_member(&self.id, user_id))
             .await?;
         Ok(())
@@ -302,8 +285,9 @@ impl Guild {
         &self,
         rest: &fluxer_rest::Rest,
     ) -> crate::Result<Vec<fluxer_types::ban::ApiBan>> {
-        let bans: Vec<fluxer_types::ban::ApiBan> =
-            rest.get(&fluxer_types::Routes::guild_bans(&self.id)).await?;
+        let bans: Vec<fluxer_types::ban::ApiBan> = rest
+            .get(&fluxer_types::Routes::guild_bans(&self.id))
+            .await?;
         Ok(bans)
     }
 
@@ -311,8 +295,9 @@ impl Guild {
         &self,
         rest: &fluxer_rest::Rest,
     ) -> crate::Result<Vec<fluxer_types::channel::ApiChannel>> {
-        let channels: Vec<fluxer_types::channel::ApiChannel> =
-            rest.get(&fluxer_types::Routes::guild_channels(&self.id)).await?;
+        let channels: Vec<fluxer_types::channel::ApiChannel> = rest
+            .get(&fluxer_types::Routes::guild_channels(&self.id))
+            .await?;
         Ok(channels)
     }
 
@@ -320,8 +305,9 @@ impl Guild {
         &self,
         rest: &fluxer_rest::Rest,
     ) -> crate::Result<Vec<fluxer_types::invite::ApiInvite>> {
-        let invites: Vec<fluxer_types::invite::ApiInvite> =
-            rest.get(&fluxer_types::Routes::guild_invites(&self.id)).await?;
+        let invites: Vec<fluxer_types::invite::ApiInvite> = rest
+            .get(&fluxer_types::Routes::guild_invites(&self.id))
+            .await?;
         Ok(invites)
     }
 
@@ -329,8 +315,9 @@ impl Guild {
         &self,
         rest: &fluxer_rest::Rest,
     ) -> crate::Result<Vec<fluxer_types::webhook::ApiWebhook>> {
-        let webhooks: Vec<fluxer_types::webhook::ApiWebhook> =
-            rest.get(&fluxer_types::Routes::guild_webhooks(&self.id)).await?;
+        let webhooks: Vec<fluxer_types::webhook::ApiWebhook> = rest
+            .get(&fluxer_types::Routes::guild_webhooks(&self.id))
+            .await?;
         Ok(webhooks)
     }
 
@@ -338,8 +325,9 @@ impl Guild {
         &self,
         rest: &fluxer_rest::Rest,
     ) -> crate::Result<fluxer_types::guild::ApiGuildAuditLog> {
-        let logs: fluxer_types::guild::ApiGuildAuditLog =
-            rest.get(&fluxer_types::Routes::guild_audit_logs(&self.id)).await?;
+        let logs: fluxer_types::guild::ApiGuildAuditLog = rest
+            .get(&fluxer_types::Routes::guild_audit_logs(&self.id))
+            .await?;
         Ok(logs)
     }
 
@@ -347,8 +335,9 @@ impl Guild {
         &self,
         rest: &fluxer_rest::Rest,
     ) -> crate::Result<Vec<fluxer_types::emoji::ApiEmoji>> {
-        let emojis: Vec<fluxer_types::emoji::ApiEmoji> =
-            rest.get(&fluxer_types::Routes::guild_emojis(&self.id)).await?;
+        let emojis: Vec<fluxer_types::emoji::ApiEmoji> = rest
+            .get(&fluxer_types::Routes::guild_emojis(&self.id))
+            .await?;
         Ok(emojis)
     }
 
@@ -367,8 +356,9 @@ impl Guild {
         &self,
         rest: &fluxer_rest::Rest,
     ) -> crate::Result<Vec<fluxer_types::sticker::ApiSticker>> {
-        let stickers: Vec<fluxer_types::sticker::ApiSticker> =
-            rest.get(&fluxer_types::Routes::guild_stickers(&self.id)).await?;
+        let stickers: Vec<fluxer_types::sticker::ApiSticker> = rest
+            .get(&fluxer_types::Routes::guild_stickers(&self.id))
+            .await?;
         Ok(stickers)
     }
 
@@ -378,12 +368,16 @@ impl Guild {
         positions: &Value,
     ) -> crate::Result<Vec<fluxer_types::role::ApiRole>> {
         let raw: Value = rest
-            .patch(&fluxer_types::Routes::guild_roles(&self.id), Some(positions))
+            .patch(
+                &fluxer_types::Routes::guild_roles(&self.id),
+                Some(positions),
+            )
             .await?;
         let roles: Vec<fluxer_types::role::ApiRole> = match raw {
             Value::Null => vec![],
-            other => serde_json::from_value(other)
-                .map_err(|e| crate::Error::Other(e.to_string()))?,
+            other => {
+                serde_json::from_value(other).map_err(|e| crate::Error::Other(e.to_string()))?
+            }
         };
         Ok(roles)
     }
@@ -394,7 +388,10 @@ impl Guild {
         positions: &Value,
     ) -> crate::Result<()> {
         let _: Value = rest
-            .patch(&fluxer_types::Routes::guild_channels(&self.id), Some(positions))
+            .patch(
+                &fluxer_types::Routes::guild_channels(&self.id),
+                Some(positions),
+            )
             .await?;
         Ok(())
     }

@@ -1,12 +1,12 @@
+pub mod client;
+pub mod collectors;
 pub mod error;
+pub mod events;
 pub mod structures;
 pub mod util;
-pub mod client;
-pub mod events;
-pub mod collectors;
 
-pub use error::*;
-pub use structures::*;
 pub use client::Client;
-pub use events::Events;
 pub use collectors::*;
+pub use error::*;
+pub use events::Events;
+pub use structures::*;

@@ -1,6 +1,6 @@
+use fluxer_types::Snowflake;
 use fluxer_types::channel::OverwriteType;
 use fluxer_types::user::ApiGuildMember;
-use fluxer_types::Snowflake;
 
 use crate::structures::channel::Channel;
 use crate::structures::user::User;
@@ -68,11 +68,7 @@ impl GuildMember {
         cdn::cdn_member_banner_url(&self.guild_id, &self.id, self.banner.as_deref(), opts)
     }
 
-    pub async fn add_role(
-        &self,
-        rest: &fluxer_rest::Rest,
-        role_id: &str,
-    ) -> crate::Result<()> {
+    pub async fn add_role(&self, rest: &fluxer_rest::Rest, role_id: &str) -> crate::Result<()> {
         rest.put_empty(&fluxer_types::Routes::guild_member_role(
             &self.guild_id,
             &self.id,
@@ -82,11 +78,7 @@ impl GuildMember {
         Ok(())
     }
 
-    pub async fn remove_role(
-        &self,
-        rest: &fluxer_rest::Rest,
-        role_id: &str,
-    ) -> crate::Result<()> {
+    pub async fn remove_role(&self, rest: &fluxer_rest::Rest, role_id: &str) -> crate::Result<()> {
         rest.delete_route(&fluxer_types::Routes::guild_member_role(
             &self.guild_id,
             &self.id,
@@ -118,7 +110,10 @@ impl GuildMember {
         self.role_ids.iter().any(|r| r == role_id)
     }
 
-    pub fn permissions(&self, guild_roles: &std::collections::HashMap<String, crate::structures::role::Role>) -> fluxer_util::Permissions {
+    pub fn permissions(
+        &self,
+        guild_roles: &std::collections::HashMap<String, crate::structures::role::Role>,
+    ) -> fluxer_util::Permissions {
         let mut perms = fluxer_util::Permissions::empty();
         for role in guild_roles.values() {
             let is_everyone = role.name == "@everyone" || role.id == self.guild_id;
@@ -156,7 +151,10 @@ impl GuildMember {
         let mut role_allow = fluxer_util::Permissions::empty();
         let mut role_deny = fluxer_util::Permissions::empty();
         for ow in &channel.permission_overwrites {
-            if ow.kind == OverwriteType::Role && ow.id != self.guild_id && self.role_ids.iter().any(|r| r == &ow.id) {
+            if ow.kind == OverwriteType::Role
+                && ow.id != self.guild_id
+                && self.role_ids.iter().any(|r| r == &ow.id)
+            {
                 role_deny |= fluxer_util::parse_permissions(&ow.deny);
                 role_allow |= fluxer_util::parse_permissions(&ow.allow);
             }
@@ -177,16 +175,15 @@ impl GuildMember {
     }
 
     pub async fn kick(&self, rest: &fluxer_rest::Rest) -> crate::Result<()> {
-        rest.delete_route(&fluxer_types::Routes::guild_member(&self.guild_id, &self.id))
-            .await?;
+        rest.delete_route(&fluxer_types::Routes::guild_member(
+            &self.guild_id,
+            &self.id,
+        ))
+        .await?;
         Ok(())
     }
 
-    pub async fn ban(
-        &self,
-        rest: &fluxer_rest::Rest,
-        reason: Option<&str>,
-    ) -> crate::Result<()> {
+    pub async fn ban(&self, rest: &fluxer_rest::Rest, reason: Option<&str>) -> crate::Result<()> {
         let body = reason.map(|r| serde_json::json!({ "reason": r }));
         let _: serde_json::Value = rest
             .put(

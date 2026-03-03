@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
+use crate::Snowflake;
 use crate::channel::ApiChannelPartial;
 use crate::user::ApiUser;
-use crate::Snowflake;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ApiGuildPartial {

@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+use crate::Snowflake;
 use crate::embed::ApiEmbed;
 use crate::user::{ApiGuildMember, ApiUser};
-use crate::Snowflake;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize_repr, Deserialize_repr)]
 #[repr(u8)]

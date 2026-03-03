@@ -16,16 +16,13 @@ impl ClientUser {
         &self,
         rest: &fluxer_rest::Rest,
     ) -> crate::Result<Vec<fluxer_types::guild::ApiGuild>> {
-        let guilds: Vec<fluxer_types::guild::ApiGuild> =
-            rest.get(fluxer_types::Routes::current_user_guilds()).await?;
+        let guilds: Vec<fluxer_types::guild::ApiGuild> = rest
+            .get(fluxer_types::Routes::current_user_guilds())
+            .await?;
         Ok(guilds)
     }
 
-    pub async fn leave_guild(
-        &self,
-        rest: &fluxer_rest::Rest,
-        guild_id: &str,
-    ) -> crate::Result<()> {
+    pub async fn leave_guild(&self, rest: &fluxer_rest::Rest, guild_id: &str) -> crate::Result<()> {
         rest.delete_route(&fluxer_types::Routes::leave_guild(guild_id))
             .await?;
         Ok(())

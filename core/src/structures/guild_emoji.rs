@@ -1,5 +1,5 @@
-use fluxer_types::emoji::ApiEmoji;
 use fluxer_types::Snowflake;
+use fluxer_types::emoji::ApiEmoji;
 
 use crate::util::cdn;
 

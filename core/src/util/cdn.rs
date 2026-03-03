@@ -7,7 +7,6 @@ pub struct CdnOptions {
     pub extension: Option<String>,
 }
 
-
 fn get_extension(hash: Option<&str>, opts: &CdnOptions) -> String {
     let ext = opts.extension.as_deref().unwrap_or("png");
     match hash {
@@ -94,9 +93,7 @@ pub fn cdn_guild_splash_url(
     let hash = splash_hash?;
     let ext = get_extension(Some(hash), opts);
     let size = append_size(opts);
-    Some(format!(
-        "{CDN_URL}/splashes/{guild_id}/{hash}.{ext}{size}"
-    ))
+    Some(format!("{CDN_URL}/splashes/{guild_id}/{hash}.{ext}{size}"))
 }
 
 pub fn cdn_emoji_url(emoji_id: &str, animated: bool) -> String {
@@ -110,10 +107,7 @@ pub fn cdn_sticker_url(sticker_id: &str, animated: bool) -> String {
 }
 
 pub fn cdn_default_avatar_url(user_id: &str) -> String {
-    let index = user_id
-        .parse::<u64>()
-        .map(|n| n % 6)
-        .unwrap_or(0);
+    let index = user_id.parse::<u64>().map(|n| n % 6).unwrap_or(0);
     format!("{STATIC_CDN_URL}/avatars/{index}.png")
 }
 
