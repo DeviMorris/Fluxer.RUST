@@ -1,0 +1,5 @@
+edition = "2024"
+max_width = 100
+
+[ignore]
+ignore = ["util/src/emoji.rs"]
