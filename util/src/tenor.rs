@@ -20,9 +20,11 @@ pub fn extract_tenor_id(url: &str) -> Option<String> {
     }
 
     if let Some(id) = trimmed.strip_prefix("https://tenor.com/embed/")
-        && !id.is_empty() && id.chars().all(|c| c.is_ascii_digit()) {
-            return Some(id.to_string());
-        }
+        && !id.is_empty()
+        && id.chars().all(|c| c.is_ascii_digit())
+    {
+        return Some(id.to_string());
+    }
 
     None
 }

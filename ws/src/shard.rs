@@ -281,7 +281,11 @@ impl WebSocketShard {
     }
 }
 
-async fn run_heartbeat(interval_ms: u64, tx: mpsc::UnboundedSender<Value>, initial_seq: Option<u64>) {
+async fn run_heartbeat(
+    interval_ms: u64,
+    tx: mpsc::UnboundedSender<Value>,
+    initial_seq: Option<u64>,
+) {
     let jitter = Duration::from_millis((interval_ms as f64 * rand_f64()) as u64);
     sleep(jitter).await;
 
@@ -301,8 +305,20 @@ async fn run_heartbeat(interval_ms: u64, tx: mpsc::UnboundedSender<Value>, initi
 fn should_reconnect_on_close(code: u16) -> bool {
     matches!(
         code,
-        1000 | 1001 | 1005 | 1006 | 1011 | 1012 | 1013 | 1014 | 1015
-            | 4000 | 4007 | 4009 | 4010 | 4011 | 4012
+        1000 | 1001
+            | 1005
+            | 1006
+            | 1011
+            | 1012
+            | 1013
+            | 1014
+            | 1015
+            | 4000
+            | 4007
+            | 4009
+            | 4010
+            | 4011
+            | 4012
     )
 }
 

@@ -25,6 +25,7 @@ use crate::structures::user::User;
 
 use super::event_parser;
 use super::typed_events::DispatchEvent;
+use fluxer_voice::{FluxerVoiceConnection, VoiceError, VoiceManager};
 
 type EventCallback = Box<dyn Fn(Value) -> Pin<Box<dyn Future<Output = ()> + Send>> + Send + Sync>;
 
@@ -66,6 +67,7 @@ pub struct Client {
     received_guilds: std::collections::HashSet<String>,
     message_collector_senders: Vec<mpsc::UnboundedSender<ApiMessage>>,
     reaction_collector_senders: Vec<mpsc::UnboundedSender<CollectedReaction>>,
+    pub voice: Arc<VoiceManager>,
 }
 
 impl Client {
@@ -88,6 +90,7 @@ impl Client {
             received_guilds: std::collections::HashSet::new(),
             message_collector_senders: Vec::new(),
             reaction_collector_senders: Vec::new(),
+            voice: Arc::new(VoiceManager::new()),
         }
     }
 
@@ -138,6 +141,18 @@ impl Client {
         if let Some(mgr) = &self.ws_manager {
             mgr.read().await.broadcast(payload).await;
         }
+    }
+
+    pub async fn join_voice(
+        &self,
+        guild_id: &str,
+        channel_id: &str,
+    ) -> Result<Arc<FluxerVoiceConnection>, VoiceError> {
+        self.voice.join(guild_id, channel_id).await
+    }
+
+    pub async fn leave_voice(&self, channel_id: &str) -> Result<(), VoiceError> {
+        self.voice.disconnect(channel_id).await
     }
 
     pub async fn send_to_shard(&self, shard_id: u32, payload: Value) -> Result<(), String> {
@@ -196,6 +211,16 @@ impl Client {
         manager.connect().await.map_err(crate::Error::Rest)?;
 
         self.ws_manager = Some(Arc::new(RwLock::new(manager)));
+
+        let ws_clone = self.ws_manager.as_ref().unwrap().clone();
+        self.voice
+            .set_gateway_sender(Arc::new(move |payload| {
+                let ws = ws_clone.clone();
+                tokio::spawn(async move {
+                    ws.read().await.broadcast(payload).await;
+                });
+            }))
+            .await;
 
         while let Some(event) = ws_rx.recv().await {
             match event {
@@ -262,6 +287,11 @@ impl Client {
 
     async fn handle_dispatch(&mut self, event: &str, data: &Value) {
         match event {
+            "VOICE_SERVER_UPDATE" => {
+                tracing::info!("VOICE_SERVER_UPDATE received: {:?}", data);
+                self.voice.handle_voice_server_update(data.clone());
+            }
+
             "MESSAGE_CREATE" => {
                 if let Ok(api_msg) = serde_json::from_value::<ApiMessage>(data.clone()) {
                     self.message_collector_senders.retain(|tx| !tx.is_closed());
@@ -600,14 +630,16 @@ impl Client {
     async fn emit_event(&self, event: &str, data: Value) {
         if let Some(handlers) = self.handlers.get(event) {
             for handler in handlers {
-                handler(data.clone()).await;
+                let fut = handler(data.clone());
+                tokio::spawn(fut);
             }
         }
     }
 
     async fn emit_typed_event(&self, event: DispatchEvent) {
         for handler in &self.typed_handlers {
-            handler(event.clone()).await;
+            let fut = handler(event.clone());
+            tokio::spawn(fut);
         }
     }
 

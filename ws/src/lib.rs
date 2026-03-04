@@ -1,7 +1,7 @@
-pub mod shard;
-pub mod manager;
 pub mod events;
+pub mod manager;
+pub mod shard;
 
-pub use shard::*;
-pub use manager::*;
 pub use events::*;
+pub use manager::*;
+pub use shard::*;

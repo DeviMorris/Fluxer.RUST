@@ -1,5 +1,5 @@
-use serde_json::Value;
 use fluxer_types::gateway::GatewayReceivePayload;
+use serde_json::Value;
 
 #[derive(Debug, Clone)]
 pub enum ShardEvent {

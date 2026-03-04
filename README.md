@@ -38,9 +38,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-fluxer-core     = "0.1.1"
-fluxer-builders = "0.1.1"
-fluxer-rest     = "0.1.1"
+fluxer-core     = "0.2"
+fluxer-builders = "0.2"
+fluxer-rest     = "0.2"
 tokio              = { version = "1", features = ["rt-multi-thread", "macros"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing            = "0.1"

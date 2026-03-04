@@ -1,0 +1,14 @@
+[package]
+name = "fluxer-voice"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+fluxer-types = { path = "../types" }
+livekit = { version = "0.7.32", features = ["rustls-tls-native-roots"] }
+symphonia = { version = "0.5", features = ["mp3", "aac", "alac", "flac", "vorbis", "wav", "pcm", "ogg", "isomp4", "adpcm"] }
+tokio = { workspace = true }
+dashmap = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
+#[rustfmt::skip]
 static SHORTCODE_MAP: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(|| {
     let mut m = HashMap::new();
     m.insert("100", "💯");
@@ -5947,7 +5948,11 @@ pub fn resolve_emoji_in_text(input: &str) -> String {
         let after_colon = &rest[start + 1..];
         if let Some(end) = after_colon.find(':') {
             let code = &after_colon[..end];
-            if !code.is_empty() && code.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '+' || c == '-') {
+            if !code.is_empty()
+                && code
+                    .chars()
+                    .all(|c| c.is_alphanumeric() || c == '_' || c == '+' || c == '-')
+            {
                 if let Some(emoji) = resolve_emoji(code) {
                     result.push_str(emoji);
                 } else {

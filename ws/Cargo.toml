@@ -10,8 +10,8 @@ keywords = ["fluxer", "discord", "bot", "websocket", "gateway"]
 categories = ["api-bindings", "web-programming::websocket"]
 
 [dependencies]
-fluxer-types = { path = "../types", version = "0.1" }
-fluxer-rest = { path = "../rest", version = "0.1" }
+fluxer-types = { path = "../types", version = "0.2" }
+fluxer-rest = { path = "../rest", version = "0.2" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }

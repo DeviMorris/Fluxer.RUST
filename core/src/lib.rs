@@ -9,4 +9,5 @@ pub use client::Client;
 pub use collectors::*;
 pub use error::*;
 pub use events::Events;
+pub use fluxer_voice::*;
 pub use structures::*;

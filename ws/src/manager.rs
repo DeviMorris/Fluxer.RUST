@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use serde_json::Value;
-use tokio::sync::{mpsc, RwLock};
+use tokio::sync::{RwLock, mpsc};
 
 use fluxer_types::gateway::{ApiGatewayBotResponse, GatewayPresenceUpdateSendData};
 
@@ -98,19 +98,13 @@ impl WebSocketManager {
             tokio::spawn(async move {
                 while let Some(event) = shard_rx.recv().await {
                     let ws_event = match event {
-                        ShardEvent::Ready(data) => WsEvent::ShardReady {
-                            shard_id: id,
-                            data,
-                        },
+                        ShardEvent::Ready(data) => WsEvent::ShardReady { shard_id: id, data },
                         ShardEvent::Resumed => WsEvent::ShardResumed { shard_id: id },
                         ShardEvent::Dispatch(payload) => WsEvent::Dispatch {
                             shard_id: id,
                             payload,
                         },
-                        ShardEvent::Close(code) => WsEvent::ShardClose {
-                            shard_id: id,
-                            code,
-                        },
+                        ShardEvent::Close(code) => WsEvent::ShardClose { shard_id: id, code },
                         ShardEvent::Error(msg) => WsEvent::Error {
                             shard_id: id,
                             error: msg,

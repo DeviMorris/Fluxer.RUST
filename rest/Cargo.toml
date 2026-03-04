@@ -10,7 +10,7 @@ keywords = ["fluxer", "discord", "bot", "http", "rest"]
 categories = ["api-bindings", "web-programming::http-client"]
 
 [dependencies]
-fluxer-types = { path = "../types", version = "0.1" }
+fluxer-types = { path = "../types", version = "0.2" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 reqwest = { workspace = true }
