@@ -11,12 +11,12 @@ keywords = ["fluxer", "discord", "bot", "async", "framework"]
 categories = ["api-bindings", "asynchronous"]
 
 [dependencies]
-fluxer-types = { path = "../types", version = "0.2" }
-fluxer-rest = { path = "../rest", version = "0.2" }
-fluxer-ws = { path = "../ws", version = "0.2" }
-fluxer-builders = { path = "../builders", version = "0.2" }
-fluxer-util = { path = "../util", version = "0.2" }
-fluxer-voice = { path = "../voice", version = "0.2", optional = true }
+fluxer-types = { path = "../types", version = "0.2.3" }
+fluxer-rest = { path = "../rest", version = "0.2.3" }
+fluxer-ws = { path = "../ws", version = "0.2.3" }
+fluxer-builders = { path = "../builders", version = "0.2.3" }
+fluxer-util = { path = "../util", version = "0.2.3" }
+fluxer-voice = { path = "../voice", version = "0.2.3", optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
