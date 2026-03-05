@@ -1,10 +1,3 @@
-> [!WARNING]
-> **Windows (MSVC)**
-> If you encounter `LNK2038 RuntimeLibrary mismatch`, add the following to `.cargo/config.toml`:
-> ```toml
-> [target.x86_64-pc-windows-msvc]
-> rustflags = ["-C", "target-feature=+crt-static"]
-> ```
 ![logo](assets/logo.png)
 
 # Fluxer.RUST
@@ -19,7 +12,13 @@ Rust library for building bots on the [Fluxer](https://fluxer.app) platform.
 Uses `tokio` for async runtime and `reqwest` for HTTP. No boilerplate - just write your handlers.
 
 Written because other Fluxer libraries either didn't exist in Rust or were too low-level to be useful day-to-day. This one covers the full API surface with typed events, built-in rate limiting, and proper error types.
-
+> [!WARNING]
+> **Windows (MSVC)**
+> If you encounter `LNK2038 RuntimeLibrary mismatch`, add the following to `.cargo/config.toml`:
+> ```toml
+> [target.x86_64-pc-windows-msvc]
+> rustflags = ["-C", "target-feature=+crt-static"]
+> ```
 ---
 
 ## Workspace
@@ -45,9 +44,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-fluxer-core     = { version = "0.2.1", default-features = false }
-fluxer-builders = "0.2.1"
-fluxer-rest     = "0.2.1"
+fluxer-core     = { version = "0.2.2", default-features = false }
+fluxer-builders = "0.2.2"
+fluxer-rest     = "0.2.2"
 tokio              = { version = "1", features = ["rt-multi-thread", "macros"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing            = "0.1"
