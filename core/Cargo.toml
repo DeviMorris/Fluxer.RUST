@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation.workspace = true
 description = "Rust API library for building Fluxer bots — high-level client, event system, and structures"
 keywords = ["fluxer", "discord", "bot", "async", "framework"]
 categories = ["api-bindings", "asynchronous"]
@@ -15,10 +16,14 @@ fluxer-rest = { path = "../rest", version = "0.2" }
 fluxer-ws = { path = "../ws", version = "0.2" }
 fluxer-builders = { path = "../builders", version = "0.2" }
 fluxer-util = { path = "../util", version = "0.2" }
-fluxer-voice = { path = "../voice", version = "0.2" }
+fluxer-voice = { path = "../voice", version = "0.2", optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 dashmap = { workspace = true }
+
+[features]
+default = ["voice"]
+voice = ["dep:fluxer-voice"]

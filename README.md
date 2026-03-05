@@ -1,3 +1,10 @@
+> [!WARNING]
+> **Windows (MSVC)**
+> If you encounter `LNK2038 RuntimeLibrary mismatch`, add the following to `.cargo/config.toml`:
+> ```toml
+> [target.x86_64-pc-windows-msvc]
+> rustflags = ["-C", "target-feature=+crt-static"]
+> ```
 ![logo](assets/logo.png)
 
 # Fluxer.RUST
@@ -38,9 +45,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-fluxer-core     = "0.2"
-fluxer-builders = "0.2"
-fluxer-rest     = "0.2"
+fluxer-core     = { version = "0.2.1", default-features = false }
+fluxer-builders = "0.2.1"
+fluxer-rest     = "0.2.1"
 tokio              = { version = "1", features = ["rt-multi-thread", "macros"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing            = "0.1"

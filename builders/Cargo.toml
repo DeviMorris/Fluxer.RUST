@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation.workspace = true
 description = "Message and embed builder utilities for the Fluxer bot framework"
 keywords = ["fluxer", "discord", "bot", "builder", "embed"]
 categories = ["api-bindings"]

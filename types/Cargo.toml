@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation.workspace = true
 description = "Shared API types and route definitions for the Fluxer bot framework"
 keywords = ["fluxer", "discord", "bot", "api", "types"]
 categories = ["api-bindings"]

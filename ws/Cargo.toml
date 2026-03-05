@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation.workspace = true
 description = "WebSocket gateway client for the Fluxer bot API"
 keywords = ["fluxer", "discord", "bot", "websocket", "gateway"]
 categories = ["api-bindings", "web-programming::websocket"]

@@ -2,6 +2,7 @@
 name = "fluxer-voice"
 version.workspace = true
 edition.workspace = true
+documentation.workspace = true
 
 [dependencies]
 fluxer-types = { path = "../types" }

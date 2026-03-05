@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+documentation.workspace = true
 description = "Utility helpers for the Fluxer bot framework (CDN, permissions, emoji resolvers)"
 keywords = ["fluxer", "discord", "bot", "utility"]
 categories = ["api-bindings"]

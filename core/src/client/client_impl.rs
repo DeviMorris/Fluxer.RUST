@@ -25,6 +25,7 @@ use crate::structures::user::User;
 
 use super::event_parser;
 use super::typed_events::DispatchEvent;
+#[cfg(feature = "voice")]
 use fluxer_voice::{FluxerVoiceConnection, VoiceError, VoiceManager};
 
 type EventCallback = Box<dyn Fn(Value) -> Pin<Box<dyn Future<Output = ()> + Send>> + Send + Sync>;
@@ -67,6 +68,7 @@ pub struct Client {
     received_guilds: std::collections::HashSet<String>,
     message_collector_senders: Vec<mpsc::UnboundedSender<ApiMessage>>,
     reaction_collector_senders: Vec<mpsc::UnboundedSender<CollectedReaction>>,
+    #[cfg(feature = "voice")]
     pub voice: Arc<VoiceManager>,
 }
 
@@ -90,6 +92,7 @@ impl Client {
             received_guilds: std::collections::HashSet::new(),
             message_collector_senders: Vec::new(),
             reaction_collector_senders: Vec::new(),
+            #[cfg(feature = "voice")]
             voice: Arc::new(VoiceManager::new()),
         }
     }
@@ -143,6 +146,7 @@ impl Client {
         }
     }
 
+    #[cfg(feature = "voice")]
     pub async fn join_voice(
         &self,
         guild_id: &str,
@@ -151,6 +155,7 @@ impl Client {
         self.voice.join(guild_id, channel_id).await
     }
 
+    #[cfg(feature = "voice")]
     pub async fn leave_voice(&self, channel_id: &str) -> Result<(), VoiceError> {
         self.voice.disconnect(channel_id).await
     }
@@ -213,6 +218,7 @@ impl Client {
         self.ws_manager = Some(Arc::new(RwLock::new(manager)));
 
         let ws_clone = self.ws_manager.as_ref().unwrap().clone();
+        #[cfg(feature = "voice")]
         self.voice
             .set_gateway_sender(Arc::new(move |payload| {
                 let ws = ws_clone.clone();
@@ -289,6 +295,7 @@ impl Client {
         match event {
             "VOICE_SERVER_UPDATE" => {
                 tracing::info!("VOICE_SERVER_UPDATE received: {:?}", data);
+                #[cfg(feature = "voice")]
                 self.voice.handle_voice_server_update(data.clone());
             }
 
