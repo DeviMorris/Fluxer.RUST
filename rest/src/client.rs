@@ -107,7 +107,17 @@ impl Rest {
         route: &str,
         form: reqwest::multipart::Form,
     ) -> Result<T, RestError> {
-        self.request_multipart(route, form).await
+        self.request_multipart(reqwest::Method::POST, route, form)
+            .await
+    }
+
+    pub async fn patch_multipart<T: DeserializeOwned>(
+        &self,
+        route: &str,
+        form: reqwest::multipart::Form,
+    ) -> Result<T, RestError> {
+        self.request_multipart(reqwest::Method::PATCH, route, form)
+            .await
     }
 
     async fn request<T: DeserializeOwned>(
@@ -198,6 +208,7 @@ impl Rest {
 
     async fn request_multipart<T: DeserializeOwned>(
         &self,
+        method: reqwest::Method,
         route: &str,
         form: reqwest::multipart::Form,
     ) -> Result<T, RestError> {
@@ -209,7 +220,7 @@ impl Rest {
 
         let res = self
             .http
-            .post(&url)
+            .request(method, &url)
             .headers(headers)
             .multipart(form)
             .send()

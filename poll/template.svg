@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="__W__" height="__H__" viewBox="0 0 __W__ __H__">
+  <rect width="__W__" height="__H__" fill="#17212b"/>
+
+  <text x="48" y="62"
+        font-family="Segoe UI, Inter, sans-serif"
+        font-size="13" font-weight="600" letter-spacing="4"
+        fill="#6ab3f3">__LABEL__</text>
+
+  <text x="48" y="108"
+        font-family="Segoe UI, Inter, sans-serif"
+        font-size="32" font-weight="800"
+        fill="#ffffff">__TITLE__</text>
+
+  <line x1="48" y1="128" x2="__SEP_X__" y2="128"
+        stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+  __OPTIONS__
+
+  <text x="48" y="__FOOTER_Y__"
+        font-family="Segoe UI, Inter, sans-serif"
+        font-size="14" font-weight="400"
+        fill="rgba(255,255,255,0.35)">__TOTAL_VOTES__ __VOTES_LABEL__</text>
+</svg>

@@ -1,0 +1,15 @@
+[package]
+name = "fluxer-poll"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+description = "Poll card renderer for Fluxer bots"
+keywords = ["fluxer", "discord", "bot", "poll", "image"]
+categories = ["api-bindings", "multimedia::images"]
+
+[dependencies]
+resvg = "0.41"
+anyhow = "1"

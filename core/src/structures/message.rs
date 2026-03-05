@@ -203,6 +203,22 @@ impl Message {
         Ok(msg)
     }
 
+    pub async fn edit_files(
+        &self,
+        rest: &fluxer_rest::Rest,
+        body: &fluxer_builders::MessagePayloadData,
+        files: &[fluxer_builders::FileAttachment],
+    ) -> crate::Result<ApiMessage> {
+        let form = fluxer_builders::build_multipart_form(body, files);
+        let msg: ApiMessage = rest
+            .patch_multipart(
+                &fluxer_types::Routes::channel_message(&self.channel_id, &self.id),
+                form,
+            )
+            .await?;
+        Ok(msg)
+    }
+
     pub async fn delete(&self, rest: &fluxer_rest::Rest) -> crate::Result<()> {
         rest.delete_route(&fluxer_types::Routes::channel_message(
             &self.channel_id,
