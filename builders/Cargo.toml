@@ -11,8 +11,8 @@ keywords = ["fluxer", "discord", "bot", "builder", "embed"]
 categories = ["api-bindings"]
 
 [dependencies]
-fluxer-types = { path = "../types", version = "0.3.0" }
-fluxer-util = { path = "../util", version = "0.3.0" }
+fluxer-types = { path = "../types", version = "0.3.1" }
+fluxer-util = { path = "../util", version = "0.3.1" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 reqwest = { workspace = true }

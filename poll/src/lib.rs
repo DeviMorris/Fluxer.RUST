@@ -63,6 +63,9 @@ impl PollCard {
         let opt = usvg::Options::default();
         let mut db = usvg::fontdb::Database::new();
         db.load_system_fonts();
+        db.load_font_data(include_bytes!("fonts/SegoeUI.ttf").to_vec());
+        db.load_font_data(include_bytes!("fonts/SegoeUI-SemiBold.ttf").to_vec());
+        db.load_font_data(include_bytes!("fonts/SegoeUI-Bold.ttf").to_vec());
 
         let tree = usvg::Tree::from_str(&svg, &opt, &db)?;
         let w = tree.size().width() as u32;

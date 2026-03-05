@@ -11,7 +11,7 @@ keywords = ["fluxer", "discord", "bot", "voice", "audio"]
 categories = ["api-bindings", "multimedia::audio"]
 
 [dependencies]
-fluxer-types = { path = "../types", version = "0.3.0" }
+fluxer-types = { path = "../types", version = "0.3.1" }
 livekit = { version = "0.7.32", features = ["rustls-tls-native-roots"] }
 symphonia = { version = "0.5", features = ["mp3", "aac", "alac", "flac", "vorbis", "wav", "pcm", "ogg", "isomp4", "adpcm"] }
 tokio = { workspace = true }
